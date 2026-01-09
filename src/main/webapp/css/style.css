@@ -1,0 +1,237 @@
+/* 全体 */
+body {
+    font-family: "Segoe UI", "Hiragino Sans", sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+/* ヘッダー */
+header {
+    background-color: #4a90e2;
+    color: white;
+    padding: 1rem;
+}
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+nav {
+    margin-top: 0.5rem;
+}
+nav a {
+    color: white;
+    margin-left: 1rem;
+    text-decoration: none;
+}
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* エラーメッセージ */
+.error {
+    background-color: #ffdddd;
+    color: #a33;
+    padding: 0.5rem;
+    margin: 1rem;
+    border: 1px solid #a33;
+    border-radius: 5px;
+}
+
+/* 投稿フォーム */
+.post-form {
+    background: white;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.post-form input[type="text"] {
+    width: 70%;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.post-form button {
+    padding: 0.5rem 1rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.post-form button:hover {
+    background-color: #357ab8;
+}
+
+/* タイムライン */
+.timeline {
+    margin: 1rem;
+}
+.mutter {
+    background: white;
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.mutter .user {
+    font-weight: bold;
+    color: #4a90e2;
+    margin-right: 0.5rem;
+}
+.mutter .text {
+    margin-right: 1rem;
+}
+.mutter .date {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* ナビゲーション全体 */
+nav {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ボタンを右側にまとめる */
+.nav-buttons {
+    margin-left: auto;
+}
+
+/* ボタン風リンク */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin-left: 1rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+.btn:hover {
+    background-color: #ddd;
+}
+
+/* 投稿・更新ボタン共通スタイル */
+.btn-primary {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #4a90e2; /* 青系 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+.btn-primary:hover {
+    background-color: #357ab8;
+}
+
+/* ログイン画面用 */
+.login-container {
+    max-width: 400px;
+    margin: 3rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.welcome {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.login-title {
+    font-weight: bold;
+    margin: 1rem 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.login-form label {
+    text-align: left;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+
+.login-form input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 小さい送信ボタン */
+.btn-small {
+    padding: 0.3rem 0.8rem;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+.btn-small:hover {
+    background-color: #357ab8;
+}
+
+/* エラーメッセージ・フラッシュメッセージ */
+.msg-error {
+    color: #d00;   /* 赤字のみ */
+    margin: 0.5rem 0;
+    font-weight: bold;
+}
+
+/* 既存の login-container, login-form, btn-small, msg-error を再利用 */
+
+/* 下部リンクボタン */
+.links {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.link-btn {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+.link-btn:hover {
+    background-color: #ddd;
+}
+
+/* ユーザー情報表示 */
+.user-info {
+    margin: 1rem 0;
+    text-align: left;
+    font-size: 1rem;
+}
+
+/* 下部リンクボタン（既存の link-btn を利用） */
+.links {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}

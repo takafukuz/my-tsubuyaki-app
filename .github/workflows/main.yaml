@@ -21,7 +21,6 @@ jobs:
 
       - name: Run tests
         run: mvn clean test
-        working-directory: my-tsubuyaki-app
 
       - name: Upload test reports
         uses: actions/upload-artifact@v4
@@ -31,11 +30,10 @@ jobs:
 
       - name: Build WAR
         run: mvn package
-        working-directory: my-tsubuyaki-app
 
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
           name: my-tsubuyaki-app-war
-          path: my-tsubuyaki-app/target/my-tsubuyaki-app.war
+          path: target/my-tsubuyaki-app.war
           

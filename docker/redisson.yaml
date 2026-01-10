@@ -1,0 +1,4 @@
+singleServerConfig:
+  # address: "redis://my-redis:6379"
+  address: "rediss://clustercfg.my-valkey-test.z94ork.apne1.cache.amazonaws.com:6379"
+  database: 0

@@ -1,20 +1,44 @@
 package infra;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class ConnectionFactory {
 
-    // H2 DB 接続情報
-//    private static final String JDBC_URL = "jdbc:h2:tcp://localhost/~/DokoTsubu4";
-//    private static final String DB_USER = "sa";
-//    private static final String DB_PASSWORD = "takayuki";
-    
-    // MySQL
-    private static final String JDBC_URL = "jdbc:mysql://sandmysql3.cdco0i46w18w.ap-northeast-1.rds.amazonaws.com:3306/DokoTsubu4?serverTimezone=UTC";
-    private static final String DB_USER = "admin";
-    private static final String DB_PASSWORD = "VV344g>[4_(Gh(|CRmT9yRyeTyxF";
+  private static final String JDBC_URL;
+  private static final String DB_USER;
+  private static final String DB_PASSWORD;
+
+  //スタティックブロック（クラスが初めて使われたときに実行される＝1回だけ実行）
+  static {
+	  try {
+		  Properties props = new Properties();
+		  
+		  String env = System.getProperty("env", "dev"); // デフォルトは dev
+		  String fileName = "db.properties." + env;
+		  
+		  System.out.println(fileName);
+		  
+		  InputStream is = ConnectionFactory.class.getClassLoader().getResourceAsStream(fileName);
+		  
+		  props.load(is);
+		  
+		  JDBC_URL = props.getProperty("db.url");
+		  DB_USER = props.getProperty("db.user");
+		  DB_PASSWORD = props.getProperty("db.password");
+		  
+//		  System.out.println(JDBC_URL);
+//		  System.out.println(DB_USER);
+//		  System.out.println(DB_PASSWORD);
+		  
+	  } catch (Exception e) {
+		  throw new RuntimeException("DB設定ファイルの読み込みに失敗", e);
+	  }
+  }
+  
     
     // DBコネクション作成
     public static Connection getConnection() throws SQLException {

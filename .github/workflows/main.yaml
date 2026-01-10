@@ -26,7 +26,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: my-tsubuyaki-app/target/surefire-reports/
+          path: target/surefire-reports/
 
       - name: Build WAR
         run: mvn package

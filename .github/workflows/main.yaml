@@ -5,47 +5,49 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-deploy:
+  build-deploy: # runnerを指定
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      - name: Checkout source
+      - name: Checkout source # githubからリポジトリを取得
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21 # JDK21環境を構築 mavenはrunnerに元々含まれてる
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Run tests
+      - name: Run tests # testフォルダ以下のJUnitテストコードを実行
         run: mvn clean test
 
-      - name: Upload test reports
+      - name: Upload test reports #テスト結果をartifact保存
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
           path: target/surefire-reports/
 
-      - name: Build WAR
+      - name: Build WAR # WARファイルを作る
         run: mvn package
 
-      - name: Upload WAR artifact
+      - name: Upload WAR artifact # WARファイルをartifactに保存（使うわけではない）
         uses: actions/upload-artifact@v4
         with:
           name: my-tsubuyaki-app-war
           path: target/my-tsubuyaki-app.war
       
-      - name: Login to GHCR
+      - name: Login to GHCR # GHCRにログイン
         run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build Docker Image
+      - name: Build Docker Image #dockerイメージを作成（Tomcat10 + redisson  + WAR）。タグは2つ付ける。
         run: |
           docker build \
           -t ghcr.io/${{ github.repository_owner }}/my-tsubuyaki-app:latest \
           -t ghcr.io/${{ github.repository_owner }}/my-tsubuyaki-app:${{ github.run_number }} \
           .
 
-      - name: Push Docker Image
-        run: docker push ghcr.io/${{ github.repository_owner }}/my-tsubuyaki-app:latest
+      - name: Push Docker Image # GHCRに2つのタグ名でアップロード
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/my-tsubuyaki-app:latest
+          docker push ghcr.io/${{ github.repository_owner }}/my-tsubuyaki-app:${{ github.run_number }}

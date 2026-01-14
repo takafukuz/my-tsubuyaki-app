@@ -1,0 +1,27 @@
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    image: my-nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - my-tsubuyaki-app
+    networks:
+      - mynet
+        
+  my-tsubuyaki-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.tomcat
+    image: my-tsubuyaki-app:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - mynet
+        
+networks:
+  mynet:
+        
+      

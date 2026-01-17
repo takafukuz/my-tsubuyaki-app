@@ -21,4 +21,7 @@ Thumbs.db
 *.log
 
 # config
-src\main\resources/
+src/main/resources/
+
+# sanbox
+src/test/java/sandbox/

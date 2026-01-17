@@ -7,52 +7,52 @@ import java.util.Base64;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import dao.UsersDAO;
+import dao.AdminUsersDAO;
 import entity.AuthInfo;
 
-public class LoginLogic {
+public class AdminLoginLogic {
 	
+	// 繰り返しとハッシュの長さを指定
     private static int iterations = 10000; // 反復回数
     private static int keyLength = 256;    // ハッシュの長さ
 	
-	public Integer canLogin(String userName,String password) {
+	public Integer canLogin(String username, String password) {
 		
 		try {
-			// ユーザー名をもとにDBから登録パスワードとソルト値を取得
-			UsersDAO dao = new UsersDAO();
-			AuthInfo authInfo = dao.getPassword(userName);
+			AdminUsersDAO dao = new AdminUsersDAO();
+			AuthInfo authInfo = dao.getAdminPassword(username);
 			
-			// DAOの結果がnullであれば、false
-			if ( authInfo == null ) {
-				System.out.println("認証失敗：" + userName + "のパスワード情報がありません");
+			if (authInfo == null) {
+				System.out.println("認証失敗" + username + "のパスワード情報がありませんでした。");
 				return null;
 			}
 			
-			// 入力されたパスワードを同じソルト値でハッシュ化（ハッシュ文字列はbyte[]にする必要あり）
-			byte[] salt = Base64.getDecoder().decode(authInfo.getSalt());
-	
-	        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, keyLength);
+			// DBから取得したソルト文字列をデコード（byte[]に変換）する
+			byte[] saltBytes = Base64.getDecoder().decode(authInfo.getSalt());
+			
+			// 入力されたパスワード文字列をソルトをもとにハッシュ化する（byte[]）
+	        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), saltBytes, iterations, keyLength);
 	        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 	        byte[] inputPasswordHash = skf.generateSecret(spec).getEncoded();
 	        
-			// 入力パスワードと登録パスワードを比較
+	        // DBから取得したハッシュ化済パスワード文字列をデコード（byte[]に変換する）
 	        byte[] collectPasswordHash = Base64.getDecoder().decode(authInfo.getPassword());
 	        
-	        // ログイン成功時は、userIdを返す。失敗時はnullを返す
-	        if (slowEquals(inputPasswordHash,collectPasswordHash)) {
-	        	return authInfo.getUserId()	;
+	        // slowEqualsメソッドを使って、2つのパスワードを比較する。ログイン成功時は、ユーザーIDを返す
+	        if ( slowEquals(inputPasswordHash,collectPasswordHash)) {
+	        	return authInfo.getUserId();
 	        } else {
 	        	return null;
 	        }
-	        
 		
-		} catch (NoSuchAlgorithmException | InvalidKeySpecException | IllegalArgumentException e){
-	        // コンソールにエラー吐き出して、終了はしない
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException | IllegalArgumentException e) {
+	        // コンソールにエラー出力。終了せずにnullで返す。
 	        e.printStackTrace();
 	        return null;
 		}
+		
 	}
-
+	
     // 遅い比較 (タイミング攻撃対策)
 	// パスワードに違いがあっても、短い方の長さまでは必ずループを回す。
 	// 違いがあっても、応答時間をなるべく引き伸ばすことで、タイミング攻撃を防ぐ
@@ -66,5 +66,5 @@ public class LoginLogic {
         // diffが0のままなら、true、0以外ならfalse
         return diff == 0;
     }
-	
+
 }

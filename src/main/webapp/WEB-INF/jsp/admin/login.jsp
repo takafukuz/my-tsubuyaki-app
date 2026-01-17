@@ -5,11 +5,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
+<title>ログイン</title>
 </head>
 <body>
 <p>my-tsubuyaki-app 管理サイトへようこそ
 <p>ログインしてください</p>
+	<c:if test="${not empty errorMsg }">
+		<c:out value="${errorMsg }"></c:out>
+	</c:if>
 <form action="login" method="post">
 <label>ユーザー名<input type="text" name="username" required></label><br>
 <label>パスワード<input type="password" name="password" required></label><br>

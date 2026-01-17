@@ -1,4 +1,4 @@
-package infra;
+package infrastructure;
 
 import java.io.InputStream;
 import java.sql.Connection;

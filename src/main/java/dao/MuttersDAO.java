@@ -10,7 +10,7 @@ import java.util.List;
 
 import common.DbOpeResult;
 import entity.Mutter;
-import infra.ConnectionFactory;
+import infrastructure.ConnectionFactory;
 
 public class MuttersDAO {
 	

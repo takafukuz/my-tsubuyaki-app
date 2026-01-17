@@ -32,7 +32,8 @@ public class LoginStateFilter extends HttpFilter implements Filter {
 		if (uri.startsWith(req.getContextPath() + "/css/")
 		    || uri.startsWith(req.getContextPath() + "/images/")
 		    || uri.startsWith(req.getContextPath() + "/js/")
-		    || uri.equals(req.getContextPath() + "/login")) {
+		    || uri.equals(req.getContextPath() + "/login")
+		    || uri.startsWith(req.getContextPath() + "/admin/")) {
 		    chain.doFilter(request, response);
 		    return;
 		}

@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 import common.DbOpeResult;
 import entity.AuthInfo;
-import infra.ConnectionFactory;
+import infrastructure.ConnectionFactory;
 
 
 public class UsersDAO {

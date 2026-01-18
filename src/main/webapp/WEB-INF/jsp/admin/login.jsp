@@ -8,7 +8,12 @@
 <title>ログイン</title>
 </head>
 <body>
-<p>my-tsubuyaki-app 管理サイトへようこそ
+<p>my-tsubuyaki-app 管理サイトへようこそ</p>
+
+<c:if test="${not empty sessionScope.flashMsg }">
+  <c:out value="${sessionScope.flashMsg }" />
+  <c:remove var="flashMsg" scope="session" />
+</c:if>
 <p>ログインしてください</p>
 	<c:if test="${not empty errorMsg }">
 		<c:out value="${errorMsg }"></c:out>

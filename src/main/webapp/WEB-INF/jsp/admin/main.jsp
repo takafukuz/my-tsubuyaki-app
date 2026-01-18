@@ -37,5 +37,6 @@
 </c:forEach>
 </tbody>
 </table>
+<div><a href="${pageContext.request.contextPath}/admin/logout">ログアウト</a></div>
 </body>
 </html>

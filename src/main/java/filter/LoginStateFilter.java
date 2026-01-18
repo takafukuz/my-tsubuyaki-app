@@ -41,9 +41,8 @@ public class LoginStateFilter extends HttpFilter implements Filter {
 		}
 		
 		// ログイン状態のチェック
-		// falseを入れると、セッションがない場合nullで返す。
-		// ()のままだと、セッションが新しく作られる
-		HttpSession session = req.getSession(false);
+		// (false)にするかどうか、要検討
+		HttpSession session = req.getSession();
 		
 		// 管理サイトについて
 		if (uri.startsWith(ctx + "/admin/")) {

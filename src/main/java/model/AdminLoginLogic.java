@@ -20,7 +20,7 @@ public class AdminLoginLogic {
 		
 		try {
 			AdminUsersDAO dao = new AdminUsersDAO();
-			AuthInfo authInfo = dao.getAdminPassword(username);
+			AuthInfo authInfo = dao.getPassword(username);
 			
 			if (authInfo == null) {
 				System.out.println("認証失敗" + username + "のパスワード情報がありませんでした。");

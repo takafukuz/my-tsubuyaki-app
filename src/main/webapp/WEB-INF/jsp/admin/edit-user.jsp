@@ -8,6 +8,7 @@
 <title>edit-user</title>
 </head>
 <body>
+<h1>ユーザー情報編集</h1>
 <p>ユーザー情報を変更してください。</p>
 <form action="${pageContext.request.contextPath }/admin/edit-user-confirm" method="POST">
 <label>ユーザーID：<input type="text" name="userId" value="${userInfo.userId }" readonly></label><br>
@@ -17,7 +18,7 @@
 </form>
 
     <div>
-        <a href="${pageContext.request.contextPath}/admin/main">メイン画面へ</a>
+        <a href="${pageContext.request.contextPath}/admin/main">戻る</a>
     </div>
     
 </body>

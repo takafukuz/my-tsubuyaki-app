@@ -1,11 +1,24 @@
 package model;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 import java.util.List;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+import common.DbOpeResult;
 import dao.AdminUsersDAO;
+import entity.NewUserForm;
+import entity.NewUserInfo;
 import entity.UserInfo;
 
 public class AdminUserLogic {
+	
+    private static int iterations = 10000; // 反復回数
+    private static int keyLength = 256;    // ハッシュの長さ
 	
 	public List<UserInfo> getUserList(){
 		
@@ -23,4 +36,43 @@ public class AdminUserLogic {
 		
 		return userInfo;
 	}
+	
+	public DbOpeResult addUser(NewUserForm newUserForm) {
+		
+		String userName = newUserForm.getUserName();
+		int adminPriv = newUserForm.getAdminPriv();
+		String password = newUserForm.getPassword();
+		
+		NewUserInfo newUserInfo = new NewUserInfo();
+		
+		try {
+			// ソルトの生成
+	        SecureRandom random = new SecureRandom();
+	        byte[] salt = new byte[16];
+	        random.nextBytes(salt); // ランダムなバイト列を生成
+	        String saltStr = Base64.getEncoder().encodeToString(salt); // 文字列に変換=DB保存用
+	        
+	        // パスワードのハッシュ化
+	        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, keyLength);
+	        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+	        byte[] passwordHash = skf.generateSecret(spec).getEncoded();
+		    String passwordHashStr = Base64.getEncoder().encodeToString(passwordHash); //文字列に変換
+		    
+		    // NewUserInfo型に保存して、DAOに投げる
+		    newUserInfo = new NewUserInfo(userName, adminPriv, passwordHashStr, saltStr);
+		    
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException | IllegalArgumentException e) {
+			
+			e.printStackTrace();
+	        return DbOpeResult.ERROR;
+		}
+		
+	    AdminUsersDAO dao = new AdminUsersDAO();
+	    DbOpeResult result = dao.addUser(newUserInfo);
+	    
+	    return result;	
+		
+	}
+	
+	
 }

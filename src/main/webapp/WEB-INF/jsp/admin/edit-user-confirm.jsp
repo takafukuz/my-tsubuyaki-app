@@ -9,7 +9,8 @@
 </head>
 <body>
 
-    <p>下記の情報に変更します</p>
+    <h1>ユーザー情報編集</h1>
+    <p>下記の情報に更新します</p>
 
     <div>ユーザーID：<c:out value="${userInfo.userId}"/></div>
     
@@ -17,7 +18,7 @@
 
     <div> 管理者権限：
     <c:choose>
-        <c:when test="${userInfo.adminPriv == 1}">✓ あり</c:when>
+        <c:when test="${userInfo.adminPriv == 1}">あり</c:when>
         <c:otherwise>なし</c:otherwise>
     </c:choose>
     </div>
@@ -26,7 +27,7 @@
         <input type="hidden" name="userId" value="${userInfo.userId}">
         <input type="hidden" name="userName" value="${userInfo.userName}">
         <input type="hidden" name="adminPriv" value="${userInfo.adminPriv}">
-        <input type="submit" value="変更">
+        <input type="submit" value="更新">
     </form>
     
     <div>

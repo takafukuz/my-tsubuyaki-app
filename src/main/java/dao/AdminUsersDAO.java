@@ -10,6 +10,7 @@ import java.util.List;
 
 import common.DbOpeResult;
 import entity.AuthInfo;
+import entity.NewUserInfo;
 import entity.UserInfo;
 import infrastructure.ConnectionFactory;
 
@@ -126,5 +127,41 @@ public class AdminUsersDAO {
 		
 	}
 	
+	public DbOpeResult addUser(NewUserInfo newUserInfo) {
+		
+		String sql = "insert into users (username, adminpriv, password_hash, salt) values (?, ?, ?, ?)";
+		
+		try (Connection conn = ConnectionFactory.getConnection();
+				PreparedStatement pStmt = conn.prepareStatement(sql)) {
+			
+			String userName =  newUserInfo.getUserName();
+			int adminPriv = newUserInfo.getAdminPriv();
+			String passwordHash = newUserInfo.getPasswordHash();
+			String salt = newUserInfo.getSalt();
+			
+			pStmt.setString(1, userName);
+			pStmt.setInt(2, adminPriv);
+			pStmt.setString(3, passwordHash);
+			pStmt.setString(4, salt);
+			
+			int affectRows = pStmt.executeUpdate();
+			
+			if (affectRows != 1) {
+				return DbOpeResult.ERROR;
+			} else {
+				return DbOpeResult.SUCCESS;
+			}
+			
+		} catch (SQLException e) {
+			
+	        if (e.getErrorCode() == 1062) { 
+	            // user_name UNIQUE 制約違反
+	            return DbOpeResult.DUPLICATE;
+	        }
+	        
+			e.printStackTrace();
+			return DbOpeResult.ERROR;
+		}
+	}
 
 }

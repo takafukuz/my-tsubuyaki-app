@@ -8,6 +8,7 @@
 <title>edit-user-complete</title>
 </head>
 <body>
+    <h1>ユーザー情報編集</h1>
     <p>下記の情報で更新しました</p>
 
     <div>ユーザーID：<c:out value="${userInfo.userId}"/></div>
@@ -16,7 +17,7 @@
 
     <div>管理者権限：
             <c:choose>
-                <c:when test="${userInfo.adminPriv == 1}">✓ あり</c:when>
+                <c:when test="${userInfo.adminPriv == 1}">あり</c:when>
                 <c:otherwise>なし</c:otherwise>
             </c:choose>
     </div>

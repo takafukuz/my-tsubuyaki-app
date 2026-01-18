@@ -14,7 +14,7 @@
 </style>
 </head>
 <body>
-<p>管理サイト　メイン</p>
+<h1>管理サイトメイン</h1>
 <c:if test="${not empty sessionScope.errorMsg  }">
     <c:out value="${sessionScope.errorMsg }"/>
     <c:remove var="errorMsg" scope="session"/>
@@ -38,5 +38,6 @@
 </tbody>
 </table>
 <div><a href="${pageContext.request.contextPath}/admin/logout">ログアウト</a></div>
+<div><a href="${pageContext.request.contextPath}/admin/add-user">ユーザーの追加</a></div>
 </body>
 </html>

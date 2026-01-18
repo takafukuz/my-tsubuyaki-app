@@ -19,9 +19,12 @@ public class LogoutServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		HttpSession session = request.getSession();
-		session.removeAttribute("LoginUserInfo");
+		session.invalidate();
+		System.out.println("Session invalidated:" + session.getId());
 		
-		session.setAttribute("flashMsg","ログアウトしました");
+		// フラッシュメッセージ用にセッションを作る
+		HttpSession newSession = request.getSession();
+		newSession.setAttribute("flashMsg","ログアウトしました");
 		response.sendRedirect(request.getContextPath()+"/login");
 	}
 

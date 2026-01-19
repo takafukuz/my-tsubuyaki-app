@@ -40,10 +40,10 @@ public class AdminUsersDAO {
 
 	// ユーザー一覧の取得
 	public List<UserInfo> getUserList() {
-
-		List<UserInfo> userList = new ArrayList<>();
 		
 		String sql = "select userid, username, adminpriv from users order by userid";
+		
+		List<UserInfo> userList = new ArrayList<>();
 		
 		// DB接続して、クエリを実行
 		try (Connection conn = ConnectionFactory.getConnection();
@@ -58,6 +58,8 @@ public class AdminUsersDAO {
 	            UserInfo userInfo = new UserInfo(rs.getInt("userid"),rs.getString("username"),rs.getInt("adminpriv"));
 	            userList.add(userInfo);
 	        }
+	        
+			return userList;
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -65,7 +67,7 @@ public class AdminUsersDAO {
 			return Collections.emptyList();
 		}
 				
-		return userList;
+
 		
 	}
 	
@@ -161,6 +163,95 @@ public class AdminUsersDAO {
 	        
 			e.printStackTrace();
 			return DbOpeResult.ERROR;
+		}
+	}
+
+public List<UserInfo> findUsersByIds(List<Integer> userIds) {
+	
+		// もし、userIdsが空なら、空のリストを返す
+	    if (userIds == null || userIds.isEmpty()) {
+	        return Collections.emptyList();
+	    }
+
+		// プレースホルダとして、userIdsの個数分？を用意する
+		// , 区切りだが、最後の？には , をつけない
+		StringBuilder sb = new StringBuilder();
+		
+		for ( int i = 0; i < userIds.size(); i++) {
+			sb.append("?");
+			if ( i < userIds.size() - 1) {
+				sb.append(",");
+			}
+		}
+		
+		String sql = "select userid, username, adminpriv from users where userid in (" + sb.toString() + ")";
+		
+		List<UserInfo> userList = new ArrayList<>();
+		
+		try (Connection conn = ConnectionFactory.getConnection();
+				PreparedStatement pStmt = conn.prepareStatement(sql)) {
+			
+			// プレースホルダの数だけ、値を用意する
+			for ( int n = 0; n < userIds.size(); n++) {
+				pStmt.setInt(n+1, userIds.get(n));
+			}
+			
+			ResultSet rs = pStmt.executeQuery();
+			
+			// 結果を取得するには、rs.nextが必要
+	        while (rs.next()) {
+	        	// レコード内容をUserInfo型に入れてリストに入れる
+	            UserInfo userInfo = new UserInfo(rs.getInt("userid"),rs.getString("username"),rs.getInt("adminpriv"));
+	            userList.add(userInfo);
+	        }
+			
+			return userList;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			// nullで返すと、呼び出し元でNPEを起こしやすいので、空のリストを返す
+			return Collections.emptyList();
+		}
+	}
+	
+	public int delUser(List<Integer> userIds) {
+		
+		// プレースホルダとして、userIdsの個数分？を用意する
+		// , 区切りだが、最後の？には , をつけない
+		StringBuilder sb = new StringBuilder();
+		
+		for ( int i = 0; i < userIds.size(); i++) {
+			sb.append("?");
+			if ( i < userIds.size() - 1) {
+				sb.append(",");
+			}
+		}
+		
+		String sql = "delete from users where userid in (" + sb.toString() + ")";
+		
+		try (Connection conn = ConnectionFactory.getConnection();
+				PreparedStatement pStmt = conn.prepareStatement(sql)) {
+			
+			// プレースホルダの数だけ、値を用意する
+			for ( int n = 0; n < userIds.size(); n++) {
+				pStmt.setInt(n+1, userIds.get(n));
+			}
+			
+			int affectedRows = pStmt.executeUpdate();
+			
+//			if (affectedRows == userIds.size()) {
+//				return DbOpeResult.SUCCESS;
+//			} else {
+//				return DbOpeResult.ERROR;
+//			}
+			// 削除件数を返す
+			return affectedRows;
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			// エラー時は-1を返す
+			return -1;
 		}
 	}
 

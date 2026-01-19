@@ -74,5 +74,21 @@ public class AdminUserLogic {
 		
 	}
 	
+	public List<UserInfo> findUsersByIds(List<Integer> userIds){
+		
+		AdminUsersDAO dao = new AdminUsersDAO();
+		List<UserInfo> userList = dao.findUsersByIds(userIds);
+
+		return userList;
+	}
+	
+	public int delUser(List<Integer> userIds) {
+
+		AdminUsersDAO dao = new AdminUsersDAO();
+		int result = dao.delUser(userIds);
+		
+		return result;
+		
+	}
 	
 }

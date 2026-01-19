@@ -1,0 +1,49 @@
+{
+  "family": "my-tsubuyaki-app-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::265556964465:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::265556964465:role/ECS_TaskRole_Tsubuyaki",
+  "containerDefinitions": [
+    {
+      "name": "my-tsubuyaki-app",
+      "image": "REPLACE_APP_IMAGE",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/my-tsubuyaki-app-task",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    },
+    {
+      "name": "my-nginx",
+      "image": "REPLACE_NGINX_IMAGE",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/my-tsubuyaki-app-task",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}

@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>edit-user-complete</title>
+<title>つぶやきアプリ管理サイト</title>
 </head>
 <body>
     <h1>ユーザー情報編集</h1>

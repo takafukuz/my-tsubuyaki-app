@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>user-add</title>
+<title>つぶやきアプリ管理サイト</title>
 </head>
 <body>
 <h1>ユーザー追加</h1>
@@ -21,9 +21,13 @@
 <label>ユーザー名：<input type="text" name="userName" required></label><br>
 <label>パスワード：<input type="password" name="password" required></label><br>
 <label>パスワード（確認）：<input type="password" name="confirmPassword" required></label><br>
-<label>管理者権限：<input type="checkbox" name="adminPriv" value="1" required></label><br>
+<label>管理者権限：<input type="checkbox" name="adminPriv" value="1"></label><br>
 <input type="submit" value="送信">
 </form>
+
+    <div>
+        <a href="${pageContext.request.contextPath}/admin/main">戻る</a>
+    </div>
 
 </body>
 </html>

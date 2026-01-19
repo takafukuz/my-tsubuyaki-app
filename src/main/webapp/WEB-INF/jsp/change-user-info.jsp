@@ -5,12 +5,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>どこつぶ - ユーザー情報変更</title>
+<title>つぶやきアプリ ユーザー情報変更</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 <header>
-    <h1>どこつぶ</h1>
+    <h1>つぶやきアプリ</h1>
 </header>
 
 <main class="login-container">

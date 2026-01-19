@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>edit-user-confirm</title>
+<title>つぶやきアプリ管理サイト</title>
 </head>
 <body>
 

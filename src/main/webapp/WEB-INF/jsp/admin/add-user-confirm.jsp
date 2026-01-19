@@ -5,12 +5,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>add-user-confirm</title>
+<title>つぶやきアプリ管理サイト</title>
 </head>
 <body>
 
-
-    <h1>ユーザー追加確認</h1>
+    <h1>ユーザー追加</h1>
 
     <p>下記のユーザーを追加します。よろしいですか？</p>
 

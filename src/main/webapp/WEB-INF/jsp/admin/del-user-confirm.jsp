@@ -5,9 +5,11 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>del-user-confirm</title>
+<title>つぶやきアプリ管理サイト</title>
 </head>
 <body>
+
+<h1>ユーザー削除</h1>
     <p>下記のユーザーを削除します。</p>
 
 <form action="${pageContext.request.contextPath }/admin/del-user-exec" method="POST">

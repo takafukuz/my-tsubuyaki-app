@@ -5,10 +5,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>ログイン</title>
+<title>つぶやきアプリ管理サイト</title>
 </head>
 <body>
-<p>my-tsubuyaki-app 管理サイトへようこそ</p>
+<p>つぶやきアプリ管理サイトへようこそ</p>
 
 <c:if test="${not empty sessionScope.flashMsg }">
   <c:out value="${sessionScope.flashMsg }" />

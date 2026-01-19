@@ -6,12 +6,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>どこつぶ - メイン画面</title>
+<title>つぶやきアプリ メイン画面</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 <header>
-    <h1>どこつぶ</h1>
+    <h1>つぶやきアプリ</h1>
     <nav>
         <span><c:out value="${loginUser.userName}"/> さんがログイン中</span>
         <!-- ボタン風に配置 -->

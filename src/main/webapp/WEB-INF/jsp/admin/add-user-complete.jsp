@@ -5,11 +5,12 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>add-user-complete</title>
+<title>つぶやきアプリ管理サイト</title>
 </head>
 <body>
 
-    <h1>ユーザー追加完了</h1>
+    <h1>ユーザー追加</h1>
+
 
     <div >
         <c:out value="${newUserForm.userName}" /> の追加が完了しました。

@@ -5,7 +5,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>メイン</title>
+<title>つぶやきアプリ管理サイト</title>
 <style>
     tbody tr:hover {
         background-color: #f0f8ff;
@@ -14,7 +14,7 @@
 </style>
 </head>
 <body>
-<h1>管理サイトメイン</h1>
+<h1>メイン画面</h1>
 <c:if test="${not empty sessionScope.flashMsg  }">
     <c:out value="${sessionScope.flashMsg }"/>
     <c:remove var="flashMsg" scope="session"/>

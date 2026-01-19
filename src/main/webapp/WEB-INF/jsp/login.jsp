@@ -5,16 +5,16 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>どこつぶ - ログイン</title>
+<title>つぶやきアプリ ログイン</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 <header>
-    <h1>どこつぶ</h1>
+    <h1>つぶやきアプリ</h1>
 </header>
 
 <main class="login-container">
-    <p class="welcome">どこつぶへようこそ</p>
+    <p class="welcome">つぶやきアプリ へようこそ</p>
 
     <c:if test="${not empty errorMsg}">
         <p class="msg-error"><c:out value="${errorMsg}"/></p>

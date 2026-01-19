@@ -5,24 +5,46 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>つぶやきアプリ管理サイト</title>
+<title>つぶやきアプリ管理サイト - ユーザー追加完了</title>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-style.css">
 </head>
 <body>
+<header>
+  <h1>つぶやきアプリ管理サイト</h1>
+  <nav>
+    <div class="nav-buttons">
+      <a href="${pageContext.request.contextPath}/admin/logout" class="btn">ログアウト</a>
+    </div>
+  </nav>
+</header>
 
-    <h1>ユーザー追加</h1>
-
-
-    <div >
-        <c:out value="${newUserForm.userName}" /> の追加が完了しました。
+<div class="wrap">
+  <div class="card card--wide">
+    <div class="header">
+      <h1>ユーザー追加 完了</h1>
+      <p class="lead">ユーザーの追加が完了しました。</p>
     </div>
 
-    <div>
-        <a href="${pageContext.request.contextPath }/admin/add-user">ユーザー追加画面へ</a>
+    <c:if test="${not empty sessionScope.flashMsg }">
+      <div class="flash"><c:out value="${sessionScope.flashMsg }"/></div>
+      <c:remove var="flashMsg" scope="session" />
+    </c:if>
+
+    <c:if test="${not empty errorMsg }">
+      <div class="error"><c:out value="${errorMsg }"/></div>
+    </c:if>
+
+    <div class="confirm-block" style="text-align:center; margin:12px 0;">
+      <div>ユーザー名：<strong><c:out value="${newUserForm.userName }"/></strong></div>
+      <div>管理者権限：<strong><c:choose><c:when test="${newUserForm.adminPriv eq 1}">あり</c:when><c:otherwise>なし</c:otherwise></c:choose></strong></div>
     </div>
 
-    <div>
-        <a href="${pageContext.request.contextPath }/admin/main">メイン画面へ</a>
+    <div class="actions">
+      <a href="${pageContext.request.contextPath}/admin/main" class="btn">ユーザー一覧へ</a>
+      <a href="${pageContext.request.contextPath}/admin/add-user" class="btn btn-danger">別のユーザーを追加</a>
     </div>
 
+  </div>
+</div>
 </body>
 </html>

@@ -1,0 +1,470 @@
+/* admin-style.css
+   Copied from admin-login.css
+*/
+:root{
+  --green-900: #064e32;
+  --green-700: #0b6b3a;
+  --green-500: #2ca66a;
+  --green-300: #bfeed4;
+  --bg: #f6fff9;
+  --card: #ffffff;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, Arial, sans-serif;
+  background: linear-gradient(180deg, var(--bg), #eefef2);
+  color: var(--green-900);
+}
+.wrap{
+  min-height: 100%;
+  display: flex;
+  align-items: flex-start;   /* changed from center to flex-start to align content at the top */
+  justify-content: center;
+  padding: 32px;
+}
+.card{
+  width: 420px;
+  background: var(--card);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(6,40,22,0.12);
+  padding: 28px 32px;
+  box-sizing: border-box;
+}
+/* Wide card variant for admin tables */
+.card--wide{
+  max-width: 900px; /* keep consistent reduced width */
+  width: calc(100% - 80px);
+  padding: 14px 20px; /* slightly less padding to fit the narrower card */
+}
+
+/* Center everything inside a .card.card--wide */
+.card.card--wide{
+  display:flex;
+  flex-direction:column;
+  align-items:center; /* center children horizontally */
+}
+/* Make direct children of the wide card constrained and centered */
+.card.card--wide > *{
+  width:100%;
+  max-width:760px; /* inner content width; adjust as needed */
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* Ensure the table wrap still allows full-width table when needed */
+.card.card--wide .table-wrap{ width:100%; }
+.card.card--wide .user-table{ width:100%; }
+
+/* Top-actions: center inner container (already centered) but allow auto width */
+.card.card--wide .top-actions .inner{ width:100%; max-width:360px; }
+
+/* Additional: center text and controls inside the wide card */
+.card.card--wide .header,
+.card.card--wide .header h1,
+.card.card--wide .header .lead,
+.card.card--wide .flash,
+.card.card--wide .error{
+  text-align:center;
+}
+
+/* Center form groups and inputs (labels wrap inputs and are centered) */
+.card.card--wide form{
+  align-items:center;
+}
+.card.card--wide form label{
+  text-align:center;
+}
+
+/* Checkbox row style for admin privilege */
+.form-checkbox{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:10px;
+}
+
+/* Ensure actions in card are centered and buttons spaced */
+.card.card--wide .actions{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:14px;
+}
+
+/* Make sure btn-submit remains narrow and not overridden by actions styles */
+.card.card--wide .actions .btn-submit{
+  flex: 0 0 10% !important;
+  width: 10% !important;
+  min-width:56px;
+}
+
+/* Center table headers and cells inside admin cards */
+.card.card--wide .user-table thead th,
+.card.card--wide .user-table tbody td{
+  text-align:center;
+}
+
+/* Center actions area */
+.card.card--wide .actions{
+  justify-content:center;
+}
+
+/* Keep checkbox column centered */
+.card.card--wide .col-check{ text-align:center; }
+
+.header{
+  display:block;
+  text-align:center;
+  margin-bottom:18px;
+}
+.brand{ display:none; }
+h1{
+  margin:0;
+  font-size:18px;
+  color:var(--green-700);
+}
+p.lead{
+  margin:6px 0 0 0;
+  color:#2e593f;
+  font-size:13px;
+}
+.flash, .error{
+  margin:12px 0;
+  padding:10px 12px;
+  border-radius:8px;
+  font-size:14px;
+  text-align:left;
+}
+.flash{ background: var(--green-300); color: var(--green-900); }
+.error{ background:#ffecec; color:#8b1c1c; }
+form label{
+  display:block;
+  font-size:14px;
+  margin-top:12px;
+  color:#23503a;
+}
+input[type="text"], input[type="password"]{
+  width:100%;
+  padding:10px 12px;
+  margin-top:6px;
+  border:1px solid #d7ead8;
+  border-radius:6px;
+  font-size:14px;
+  box-sizing:border-box;
+}
+
+/* Admin forms: make input fields narrower (~1/3 width) for desktop inside the admin card */
+.card form input[type="text"],
+.card form input[type="password"],
+.card form textarea,
+.card form select{
+  width:33%; /* about one-third */
+  max-width:480px; /* cap to avoid excessively large inputs */
+}
+
+/* On small screens, keep inputs full-width for usability */
+@media (max-width:768px){
+  .card form input[type="text"],
+  .card form input[type="password"],
+  .card form textarea,
+  .card form select{ width:100%; }
+}
+
+.actions{
+  margin-top:16px;
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+input[type="submit"]{
+  flex:1;
+  padding:10px 14px;
+  background: linear-gradient(180deg,var(--green-500),var(--green-700));
+  color:white;
+  border:none;
+  border-radius:6px;
+  font-size:15px;
+  cursor:pointer;
+}
+.link-muted{
+  font-size:13px;
+  color:#3f6b54;
+  text-align:center; /* centered for admin login page */
+}
+
+/* Page-specific narrow submit button for add-user page */
+.btn-submit{
+  /* force the submit button to be about 1/10 width and prevent it from flexing */
+  flex: 0 0 10% !important;
+  width: 10% !important;
+  min-width: 56px; /* small but usable */
+  max-width: 120px;
+  box-sizing: border-box;
+}
+
+@media (max-width:768px){
+  .btn-submit{
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0;
+  }
+}
+
+/* Styles for admin main / user table */
+.table-wrap{ overflow:auto; margin-top:12px; }
+.user-table{ table-layout: fixed; width:100%; border-collapse:collapse; }
+.user-table thead th{ text-align:left; padding:10px 8px; background:#f1f8f4; color:var(--green-700); font-weight:600; border-bottom:1px solid #e6efe8; }
+.user-table tbody td{ padding:10px 8px; border-bottom:1px solid #f2f6f3; }
+.user-table td, .user-table th{ word-break:keep-all; }
+.user-table tbody tr:hover{ background: #f6fff6; cursor: pointer; }
+
+/* prevent wrapping and provide larger minimum widths so headers don't wrap */
+.user-table{ width:100%; border-collapse:collapse; }
+.user-table thead th{ text-align:left; padding:12px 12px; background:#f1f8f4; color:var(--green-700); font-weight:600; border-bottom:1px solid #e6efe8; }
+.user-table tbody td{ padding:12px 12px; border-bottom:1px solid #f2f6f3; }
+.user-table thead th, .user-table tbody td{ white-space:nowrap; }
+
+/* Column size hints (use nth-child so no JSP changes required) */
+.col-check{ width:80px; }
+.user-table th:nth-child(2), .user-table td:nth-child(2){ min-width:120px; }
+.user-table th:nth-child(3), .user-table td:nth-child(3){ min-width:220px; }
+.user-table th:nth-child(4), .user-table td:nth-child(4){ min-width:140px; }
+
+.user-table tbody tr:hover{ background: #c8f0cc; cursor: pointer; }
+
+.actions a.link-muted{ margin-left:12px; color:var(--green-700); text-decoration:none; font-weight:600; }
+.actions input[type="submit"]{ background: #d9534f; }
+
+/* Styles for action buttons under the header */
+.top-actions{
+  display:flex;
+  justify-content:center; /* center the container horizontally */
+  margin:8px 0;
+}
+/* inner container to space buttons left and right */
+.top-actions .inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  width:240px; /* narrowed so buttons sit closer together */
+}
+/* Tight spacing variant used on admin main page to place Add and Delete buttons adjacent */
+.top-actions .inner.inner--tight{
+  width: auto; /* allow content width */
+  gap: 6px; /* small gap */
+}
+.top-actions .inner.inner--tight .btn{ margin-left:0; }
+.top-actions .btn{
+  flex:0 0 100px;
+  text-align:center;
+  margin-left:0;
+  box-sizing: border-box;
+  padding:8px 12px;
+}
+/* delete button style (similar prominence as btn-danger but distinct color) */
+.btn-delete{
+  background: linear-gradient(180deg,#e05649,#c93d2f);
+  color: #fff;
+  border: none;
+  border-radius:6px;
+  /* padding moved to .top-actions .btn for consistency */
+}
+
+@media (max-width:480px){
+  .card{ width:92%; padding:20px; }
+  .top-actions{ flex-direction:column; gap:8px; }
+  .top-actions .inner{ width:100%; }
+  .top-actions .btn{ flex:1; }
+}
+
+/* Responsive: on smaller screens allow wrapping and remove min-width hints */
+@media (max-width:768px){
+  .user-table thead th, .user-table tbody td{ white-space:normal; }
+  .user-table th:nth-child(2), .user-table td:nth-child(2),
+  .user-table th:nth-child(3), .user-table td:nth-child(3),
+  .user-table th:nth-child(4), .user-table td:nth-child(4){ min-width:0; }
+  .col-check{ width:56px; }
+}
+@media (max-width:1024px){
+  .card--wide{ width: calc(100% - 40px); }
+}
+
+/* Header styles (match main site's style.css header) */
+header{
+  /* use admin green palette for header to match admin pages */
+  background-color: var(--green-700);
+  color: white;
+  padding: 1rem;
+}
+header h1{ margin:0; font-size:1.25rem; color: white; }
+header nav{ margin-top:0.5rem; display:flex; align-items:center; justify-content:space-between; }
+.nav-buttons{ margin-left:auto; }
+.btn{ display:inline-block; padding:0.45rem 0.9rem; margin-left:1rem; background-color:#f0f0f0; color:#333; border-radius:5px; text-decoration:none; font-weight:600; }
+.btn:hover{ background-color:#ddd; }
+.btn-danger{
+  background: linear-gradient(180deg,var(--green-500),var(--green-700));
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 6px rgba(2,60,30,0.12);
+}
+.btn-danger:hover{ opacity:0.95; }
+
+/* Reduce vertical gap between header and card for admin pages */
+header + .wrap{
+  padding-top: 6px; /* tightened further */
+}
+
+/* Tighter spacing for the card header title */
+.card .header{
+  margin-top: 2px; /* minimal space above the title */
+  margin-bottom: 6px; /* slightly reduced below */
+}
+
+/* Reduce top padding for wide card variant so content appears closer to header */
+.card--wide{
+  max-width: 900px; /* keep consistent reduced width */
+  width: calc(100% - 80px);
+  padding: 14px 20px; /* slightly less padding to fit the narrower card */
+}
+
+/* Center everything inside a .card.card--wide */
+.card.card--wide{
+  display:flex;
+  flex-direction:column;
+  align-items:center; /* center children horizontally */
+}
+/* Make direct children of the wide card constrained and centered */
+.card.card--wide > *{
+  width:100%;
+  max-width:760px; /* inner content width; adjust as needed */
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* Ensure the table wrap still allows full-width table when needed */
+.card.card--wide .table-wrap{ width:100%; }
+.card.card--wide .user-table{ width:100%; }
+
+/* Top-actions: center inner container (already centered) but allow auto width */
+.card.card--wide .top-actions .inner{ width:100%; max-width:360px; }
+
+/* Additional: center text and controls inside the wide card */
+.card.card--wide .header,
+.card.card--wide .header h1,
+.card.card--wide .header .lead,
+.card.card--wide .flash,
+.card.card--wide .error{
+  text-align:center;
+}
+
+/* Center form groups and inputs (labels wrap inputs and are centered) */
+.card.card--wide form{
+  align-items:center;
+}
+.card.card--wide form label{
+  text-align:center;
+}
+
+/* Checkbox row style for admin privilege */
+.form-checkbox{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:10px;
+}
+
+/* Ensure actions in card are centered and buttons spaced */
+.card.card--wide .actions{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:14px;
+}
+
+/* Make sure btn-submit remains narrow and not overridden by actions styles */
+.card.card--wide .actions .btn-submit{
+  flex: 0 0 10% !important;
+  width: 10% !important;
+  min-width:56px;
+}
+
+/* Center table headers and cells inside admin cards */
+.card.card--wide .user-table thead th,
+.card.card--wide .user-table tbody td{
+  text-align:center;
+}
+
+/* Center actions area */
+.card.card--wide .actions{
+  justify-content:center;
+}
+
+/* Keep checkbox column centered */
+.card.card--wide .col-check{ text-align:center; }
+
+/* Login-specific adjustments: enlarge the login card and make inputs wider */
+.card.card--login{
+  /* reduced from 760px to ~380px per request (about half) */
+  width: 380px !important;
+  max-width: 92% !important;
+  padding: 20px 24px !important;
+  box-sizing: border-box;
+}
+
+.card.card--login input[type="text"],
+.card.card--login input[type="password"]{
+  /* keep relative width but cap to a smaller max so visible width is about half of previous */
+  width:80% !important; /* 80% of 380px ≈ 304px */
+  max-width:320px !important; /* cap close to half of previous wide size */
+  padding:10px 12px !important;
+  font-size:14px !important;
+  box-sizing:border-box !important;
+}
+
+/* Login page: slightly larger lead text for the admin login welcome */
+.card.card--login .lead{
+  font-size:16px; /* slightly larger than default */
+  font-weight:600;
+  margin-bottom:8px;
+}
+
+@media (max-width:1024px){
+  .card.card--login{ width:92% !important; }
+  .card.card--login input[type="text"], .card.card--login input[type="password"]{ width:100% !important; max-width:100% !important; }
+}
+
+/* Final override: ensure admin login inputs and labels fit the smaller card */
+.card.card--login label{
+  display:block !important;
+  width:100% !important;
+  margin:0 0 8px 0 !important;
+}
+.card.card--login input[type="text"],
+.card.card--login input[type="password"]{
+  display:block !important;
+  width:100% !important; /* fill the label / card inner width when appropriate */
+  max-width:320px !important; /* ensure inputs don't exceed the new smaller target */
+  padding:10px 12px !important;
+  font-size:14px !important;
+  box-sizing:border-box !important;
+}
+.card.card--login label > input{ display:block !important; }
+
+@media (min-width:1200px){
+  .card.card--login{ width:380px !important; }
+  .card.card--login input[type="text"], .card.card--login input[type="password"]{ max-width:320px !important; }
+}
+
+/* Admin-login specific button color: dark green */
+.card.card--login .actions input[type="submit"]{
+  background: linear-gradient(180deg, var(--green-700), var(--green-900));
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 2px 6px rgba(2,60,30,0.12);
+}
+.card.card--login .actions input[type="submit"]:hover{
+  opacity: 0.95;
+}

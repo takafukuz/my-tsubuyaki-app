@@ -5,25 +5,46 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>つぶやきアプリ管理サイト</title>
+<title>つぶやきアプリ管理サイト - ユーザー編集完了</title>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/admin-style.css">
 </head>
 <body>
-    <h1>ユーザー情報編集</h1>
-    <p>下記の情報で更新しました</p>
-
-    <div>ユーザーID：<c:out value="${userInfo.userId}"/></div>
-
-    <div>ユーザー名：<c:out value="${userInfo.userName}"/></div>
-
-    <div>管理者権限：
-            <c:choose>
-                <c:when test="${userInfo.adminPriv == 1}">あり</c:when>
-                <c:otherwise>なし</c:otherwise>
-            </c:choose>
+<header>
+  <h1>つぶやきアプリ管理サイト</h1>
+  <nav>
+    <div class="nav-buttons">
+      <a href="${pageContext.request.contextPath}/admin/logout" class="btn">ログアウト</a>
     </div>
-    <div>
-        <a href="${pageContext.request.contextPath}/admin/main">メイン画面へ</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="card card--wide">
+    <div class="header">
+      <h1>ユーザー編集 完了</h1>
+      <p class="lead">ユーザー情報の更新が完了しました。</p>
     </div>
-    
+
+    <c:if test="${not empty sessionScope.flashMsg }">
+      <div class="flash"><c:out value="${sessionScope.flashMsg }"/></div>
+      <c:remove var="flashMsg" scope="session" />
+    </c:if>
+
+    <c:if test="${not empty errorMsg }">
+      <div class="error"><c:out value="${errorMsg }"/></div>
+    </c:if>
+
+    <div class="confirm-block" style="text-align:center; margin:12px 0;">
+      <div>ユーザーID：<strong><c:out value="${userInfo.userId }"/></strong></div>
+      <div>ユーザー名：<strong><c:out value="${userInfo.userName }"/></strong></div>
+      <div>管理者権限：<strong><c:choose><c:when test="${userInfo.adminPriv eq 1}">あり</c:when><c:otherwise>なし</c:otherwise></c:choose></strong></div>
+    </div>
+
+    <div class="actions">
+      <a href="${pageContext.request.contextPath}/admin/main" class="btn">ユーザー一覧へ</a>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>

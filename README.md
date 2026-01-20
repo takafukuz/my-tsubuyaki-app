@@ -35,11 +35,14 @@ AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプライ�
   パスワード：Demouser#2026
 
 
-  - ユーザー名：demouser02
-  - パスワード：Demouser#2026
+  ユーザー名：demouser02
+  パスワード：Demouser#2026
+  
 
-  - ユーザー名：demouser03
-  - パスワード：Demouser#2026
+  ユーザー名：demouser03
+  パスワード：Demouser#2026
+  
+  ※ご自由にご操作いただけますが、個人情報や機密情報は登録しないようご注意ください。
 
 ## インフラ構成
 「インフラ構成図」を参照

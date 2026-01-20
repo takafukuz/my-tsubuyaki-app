@@ -31,8 +31,9 @@ AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプライ�
 
 - デモ用ログイン情報（ユーザーサイト・管理サイト共通）
 
-  - ユーザー名：demouser01
-  - パスワード：Demouser#2026
+  ユーザー名：demouser01
+  パスワード：Demouser#2026
+
 
   - ユーザー名：demouser02
   - パスワード：Demouser#2026

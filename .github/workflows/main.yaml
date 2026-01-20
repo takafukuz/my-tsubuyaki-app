@@ -42,30 +42,6 @@ jobs:
           name: my-tsubuyaki-app-war
           path: target/${{ env.APP_NAME }}.war
       
-#      - name: Login to GHCR # GHCRにログイン
-#        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        
-#      - name: Build nginx Image 
-#        run: |
-#          docker build \
-#          -t ghcr.io/${{ github.repository_owner }}${{ env.WEB_NAME }}:latest \
-#          -t ghcr.io/${{ github.repository_owner }}${{ env.WEB_NAME }}:${{ github.run_number }} \
-#          -f Dockerfile.nginx .
-
-#      - name: Build Docker Image #dockerイメージを作成（Tomcat10 + redisson  + WAR）。タグは2つ付ける。
-#        run: |
-#          docker build \
-#          -t ghcr.io/${{ github.repository_owner }}/${{ env.APP_NAME }}:latest \
-#          -t ghcr.io/${{ github.repository_owner }}/${{ env.APP_NAME }}:${{ github.run_number }} \
-#          -f Dockerfile.tomcat .
-
-#      - name: Push Docker Image # GHCRに2つのタグ名でアップロード
-#        run: |
-#          docker push ghcr.io/${{ github.repository_owner }}/${{ env.APP_NAME }}:latest
-#          docker push ghcr.io/${{ github.repository_owner }}/${{ env.APP_NAME }}:${{ github.run_number }}
-#          docker push ghcr.io/${{ github.repository_owner }}/${{ env.WEB_NAME }}:latest
-#          docker push ghcr.io/${{ github.repository_owner }}/${{ env.WEB_NAME }}:${{ github.run_number }}
-
       - name: Build nginx Image 
         run: |
           docker build \
@@ -91,9 +67,6 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
           docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REPO }}
-
-#      - name: Add tag to Image
-#        run: docker tag ghcr.io/${{ github.repository_owner }}/${{ env.APP_NAME }}:latest ${{ secrets.AWS_ECR_REPO}}/${{ env.APP_NAME }}:latest
         
       - name: Push Docker Imange to ECR
         run: |
@@ -101,27 +74,29 @@ jobs:
           docker push ${{ secrets.AWS_ECR_REPO }}/${{ env.WEB_NAME }}:${{ github.run_number }}
           docker push ${{ secrets.AWS_ECR_REPO }}/${{ env.APP_NAME }}:latest
           docker push ${{ secrets.AWS_ECR_REPO }}/${{ env.APP_NAME }}:${{ github.run_number }}
+          
+# 下記は一旦コメントアウト（READMEを更新してもデプロイが走るので)
 
-      - name: Render ECS task definition tomcat
-        id: task-def-tomcat
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ecs-task-definition.json
-          container-name: my-tsubuyaki-app
-          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.APP_NAME }}:${{ github.run_number }}
-
-      - name: Render ECS task definition nginx
-        id: task-def-nginx
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-tomcat.outputs.task-definition }}
-          container-name: my-nginx
-          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.WEB_NAME }}:${{ github.run_number }}
-
-      - name: Update ECS service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-nginx.outputs.task-definition }}
-          service: my-tsubuyaki-app-task-service-3xf98aid
-          cluster: my-tsubuyaki-app
-          wait-for-service-stability: true
+#      - name: Render ECS task definition tomcat
+#        id: task-def-tomcat
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        with:
+#          task-definition: ecs-task-definition.json
+#          container-name: my-tsubuyaki-app
+#          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.APP_NAME }}:${{ github.run_number }}
+#
+#      - name: Render ECS task definition nginx
+#        id: task-def-nginx
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        with:
+#          task-definition: ${{ steps.task-def-tomcat.outputs.task-definition }}
+#          container-name: my-nginx
+#          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.WEB_NAME }}:${{ github.run_number }}
+#
+#      - name: Update ECS service
+#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+#        with:
+#          task-definition: ${{ steps.task-def-nginx.outputs.task-definition }}
+#          service: my-tsubuyaki-app-task-service-3xf98aid
+#          cluster: my-tsubuyaki-app
+#          wait-for-service-stability: true

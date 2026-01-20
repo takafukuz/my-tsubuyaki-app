@@ -3,12 +3,13 @@
 ユーザーが「つぶやき」を投稿できるシンプルなWebアプリケーションです。
 
 書籍「スッキリわかるサーブレット＆JSP入門（第4版）」（インプレス社）の題材をもとに、
-フレームワークを使用せず Servlet/JSP のみでアプリケーション全体をスクラッチ構築し、
-パスワードのハッシュ化機能やユーザー情報変更機能、管理者向け画面などを独自に追加・拡張したものです。
+パスワードのハッシュ化機能やユーザー情報変更機能、管理者向け画面などを独自に追加・拡張しました。
 
-また GitHub への push をトリガーに、  
+フレームワークを使用せず Servlet/JSP のみでアプリケーション全体をスクラッチ構築したものです。
+
+Web アプリケーション開発の全体像を意識し、GitHub への push をトリガーに、  
 Maven によるビルド → Docker イメージ作成（nginx＋Tomcat） →  
-AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプラインを構築しています。
+AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプラインを構築しています（.github/workflows/main.yaml）。
 
 稼働環境では、ALBおよびElastiCache（Valkey・セッション管理）を利用し、スケールアウト可能な実務に近い環境を再現しています。
 
@@ -16,7 +17,7 @@ AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプライ�
 - 言語: Java 21（Servlet / JSP / JSTL）
 - ビルド: Maven
 - 実行環境: Tomcat 10（ElastiCache接続用にRedissonライブラリを利用）
-- インフラ: Docker, AWS ECS(Fargate), ALB, ElastiCache（Valkey）
+- インフラ: Docker, AWS ECS(Fargate), ALB, ElastiCache（Valkey）, RDS(MySQL), SecretsManager, ACM(TLS証明書)
 - CI/CD: GitHub Actions
 
 ## Web サイトの利用方法
@@ -27,7 +28,7 @@ AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプライ�
 
 - 管理サイト ログイン URL
 
-  https://my-tsubuyaki-app.takafukuz/dev/admin/
+  https://my-tsubuyaki-app.takafukuz.dev/admin/
 
 - デモ用ログイン情報（ユーザーサイト・管理サイト共通）
 
@@ -43,6 +44,7 @@ AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプライ�
   パスワード：Demouser#2026
   
   ※ご自由にご操作いただけますが、個人情報や機密情報は登録しないようご注意ください。
+    なお、デモ環境のため、パスワードを変更された場合は、元の内容にお戻しいただけますと幸いです。
 
 ## インフラ構成
 「tsubuyaki_インフラ構成図.png」を参照
@@ -157,8 +159,8 @@ my-tsubuyaki-app/
   7. Docker イメージ（Dockerfile.nginx / Dockerfile.tomcat）をビルド
   8. AWS 認証情報を設定し ECR にログイン
   9. ビルドしたイメージを ECR に push
- 10. ECS タスク定義を Tomcat → nginx の順に更新
- 11. 更新後のタスク定義をもとに ECS サービスを更新（本番環境デプロイ）
+  10. ECS タスク定義を Tomcat → nginx の順に更新
+  11. 更新後のタスク定義をもとに ECS サービスを更新（本番環境デプロイ）
 
 - アーティファクト
   - テスト結果（`target/surefire-reports/`）が `test-reports` として保存されます。

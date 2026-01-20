@@ -90,9 +90,9 @@ my-tsubuyaki-app/
   - `DbOpeResult` - データベース操作の結果を表す列挙型（SUCCESS / DUPLICATE / NOT_FOUND / ERROR）。
 
 - package `dao` (データベースアクセスオブジェクト)
-  - `AdminUsersDAO` - 管理者向けユーザー関連の DB 操作（一覧取得、追加、更新、削除、認証情報取得）。
-  - `MuttersDAO` - つぶやき（Mutter）に関する DB 操作（一覧取得、追加）。
-  - `UsersDAO` - 通常ユーザーのパスワードやユーザー名更新に関する DB 操作。
+  - `AdminUsersDAO` - （管理画面）ユーザー関連の DB 操作（一覧取得、追加、更新、削除、認証情報取得）。
+  - `MuttersDAO` - （ユーザー画面）つぶやき（Mutter）に関する DB 操作（一覧取得、追加）。
+  - `UsersDAO` - （ユーザー画面）通常ユーザーのパスワードやユーザー名更新に関する DB 操作。
 
 - package `entity` (データ保持オブジェクト / DTO)
   - `AdminLoginUser` - 管理画面用ログイン情報（セッション保存用）。
@@ -114,28 +114,28 @@ my-tsubuyaki-app/
   - `MyTsubuyakiAppListener` - アプリケーション起動時に DB ドライバをロードするリスナー。
 
 - package `model` (ビジネスロジック)
-  - `AdminLoginLogic` - 管理者ログインの認証ロジック（PBKDF2 によるパスワード検証）。
-  - `AdminUserLogic` - 管理者用のユーザー操作ロジック（一覧取得、新規追加、削除など）。
-  - `LoginLogic` - 通常ユーザーのログイン認証ロジック（PBKDF2 検証）。
-  - `MutterLogic` - つぶやき関連の業務ロジック（一覧取得、投稿処理）。
-  - `UpdateUserInfoLogic` - ユーザー情報更新（パスワードハッシュ化、ユーザー名変更）を扱うロジック。
+  - `AdminLoginLogic` - （管理画面）管理者ログインの認証ロジック（PBKDF2 によるパスワード検証）。
+  - `AdminUserLogic` - （管理画面）ユーザー操作ロジック（一覧取得、新規追加、削除など）。
+  - `LoginLogic` - （ユーザー画面）ログイン認証ロジック（PBKDF2 検証）。
+  - `MutterLogic` - （ユーザー画面）つぶやき関連の業務ロジック（一覧取得、投稿処理）。
+  - `UpdateUserInfoLogic` - （ユーザー画面）ユーザー情報更新（パスワードハッシュ化、ユーザー名変更）を扱うロジック。
 
 - package `servlet` (HTTP エンドポイント / コントローラ)
-  - `AdminLoginServlet` - 管理画面ログインページの表示と認証処理を行うサーブレット。
-  - `AdminLogoutServlet` - 管理者ログアウトを処理しセッションを破棄するサーブレット。
-  - `AdminMainServlet` - 管理者トップ（ユーザー一覧）を表示するサーブレット。
-  - `AdminAddUserServlet` - 管理者によるユーザー追加フォームを表示するサーブレット。
-  - `AdminAddUserExecServlet` - ユーザー追加処理（DB 登録）を実行するサーブレット。
-  - `AdminEditUserServlet` - ユーザー編集フォームを表示するサーブレット。
-  - `AdminEditUserConfirmServlet` - 編集内容の確認画面へ渡すサーブレット。
-  - `AdminEditUserExecServlet` - ユーザー編集の確定（DB 更新）を行うサーブレット。
-  - `AdminDelUserServlet` - ユーザー削除の確認一覧を表示するサーブレット。
-  - `AdminDelUserExecServlet` - 選択ユーザーの削除を実行するサーブレット。
-  - `LoginServlet` - 通常ユーザーのログイン表示と認証処理を行うサーブレット。
-  - `LogoutServlet` - 通常ユーザーのログアウト処理を行うサーブレット。
-  - `MainServlet` - 一般ユーザー向けのメインページ（つぶやき一覧の表示・投稿処理）を扱うサーブレット。
-  - `ChangeUserInfoServlet` - ユーザー名変更のフォーム表示と処理を担当するサーブレット。
-  - `ChangePasswordServlet` - パスワード変更フォームの表示と更新処理を担当するサーブレット。
+  - `AdminLoginServlet` - （管理画面）ログインページの表示と認証処理を行うサーブレット。
+  - `AdminLogoutServlet` - （管理画面）ログアウトを処理しセッションを破棄するサーブレット。
+  - `AdminMainServlet` - （管理画面）メイン画面（ユーザー一覧）を表示するサーブレット。
+  - `AdminAddUserServlet` - （管理画面）ユーザー追加フォームを表示するサーブレット。
+  - `AdminAddUserExecServlet` - （管理画面）ユーザー追加処理（DB 登録）を実行するサーブレット。
+  - `AdminEditUserServlet` - （管理画面）ユーザー編集フォームを表示するサーブレット。
+  - `AdminEditUserConfirmServlet` - （管理画面）編集内容の確認画面へ渡すサーブレット。
+  - `AdminEditUserExecServlet` - （管理画面）ユーザー編集の確定（DB 更新）を行うサーブレット。
+  - `AdminDelUserServlet` - （管理画面）ユーザー削除の確認一覧を表示するサーブレット。
+  - `AdminDelUserExecServlet` - （管理画面）選択ユーザーの削除を実行するサーブレット。
+  - `LoginServlet` - （ユーザー画面）ログイン表示と認証処理を行うサーブレット。
+  - `LogoutServlet` - （ユーザー画面）ログアウト処理を行うサーブレット。
+  - `MainServlet` - （ユーザー画面）メインページ（つぶやき一覧の表示・投稿処理）を扱うサーブレット。
+  - `ChangeUserInfoServlet` - （ユーザー画面）ユーザー名変更のフォーム表示と処理を担当するサーブレット。
+  - `ChangePasswordServlet` - （ユーザー画面）パスワード変更フォームの表示と更新処理を担当するサーブレット。
 
 
 ## CI / GitHub Actions

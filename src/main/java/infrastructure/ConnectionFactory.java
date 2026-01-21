@@ -45,10 +45,10 @@ public class ConnectionFactory {
 			DB_USER = map.get("username");
 			DB_PASSWORD = map.get("password");
 		
-			System.out.println("SecretsMangerから取得した情報：");
-			System.out.println(JDBC_URL);
-			System.out.println(DB_USER);
-			System.out.println(DB_PASSWORD);
+//			System.out.println("SecretsMangerから取得した情報：");
+//			System.out.println(JDBC_URL);
+//			System.out.println(DB_USER);
+//			System.out.println(DB_PASSWORD);
 		
 		} catch (Exception e) {
 			  throw new RuntimeException("DB接続情報の取得に失敗", e);

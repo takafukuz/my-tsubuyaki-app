@@ -47,8 +47,12 @@
                 <span class="date">
                     <fmt:formatDate value="${mutter.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" timeZone="Asia/Tokyo"/>
                 </span>
-                <c:if test="${loginUser.userId == mutter.userId }"><span class="deleteBtn" data-mutter-id="${mutter.mutterId}" 
-                data-mutter="${mutter.mutter }" data-user-id="${mutter.userId }">🗑️</span></c:if>
+                <c:if test="${loginUser.userId == mutter.userId }">
+                <span class="deleteBtn" title="つぶやきを削除"
+                data-mutter-id="${mutter.mutterId}" 
+                data-mutter="${mutter.mutter }"
+                data-user-id="${mutter.userId }">🗑️
+                </span></c:if>
             </div>
         </c:forEach>
     </section>

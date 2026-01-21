@@ -34,6 +34,22 @@ public class AdminAddUserServlet extends HttpServlet {
 		String password = request.getParameter("password");
 		String confirmPassword = request.getParameter("confirmPassword");
 		
+		// パスワードがnullの場合
+		if ( password == null || confirmPassword == null ) {
+			request.setAttribute("errorMsg", "パスワードが入力されていません。");
+			RequestDispatcher disp = request.getRequestDispatcher("/WEB-INF/jsp/admin/add-user.jsp");
+			disp.forward(request, response);
+			return;
+		}
+		
+		// パスワードの文字数チェック
+		if ( password.length() < 8 ) {
+			request.setAttribute("errorMsg", "パスワードは8文字以上で入力してください。");
+			RequestDispatcher disp = request.getRequestDispatcher("/WEB-INF/jsp/admin/add-user.jsp");
+			disp.forward(request, response);
+			return;
+		}
+		
 		// 2つのパスワードが違っていたら、入力画面に戻して、エラーmsgを表示
 		if (!password.equals(confirmPassword)) {
 			request.setAttribute("errorMsg", "パスワードを正しく入力してください");

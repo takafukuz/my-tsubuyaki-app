@@ -77,26 +77,26 @@ jobs:
           
 # 下記のデプロイ処理は、必要に応じてコメントアウトすること
 
-      - name: Render ECS task definition tomcat
-        id: task-def-tomcat
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ecs-task-definition.json
-          container-name: my-tsubuyaki-app
-          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.APP_NAME }}:${{ github.run_number }}
-
-      - name: Render ECS task definition nginx
-        id: task-def-nginx
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-tomcat.outputs.task-definition }}
-          container-name: my-nginx
-          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.WEB_NAME }}:${{ github.run_number }}
-
-      - name: Update ECS service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def-nginx.outputs.task-definition }}
-          service: my-tsubuyaki-app-task-service-3xf98aid
-          cluster: my-tsubuyaki-app
-          wait-for-service-stability: true
+#      - name: Render ECS task definition tomcat
+#        id: task-def-tomcat
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        with:
+#          task-definition: ecs-task-definition.json
+#          container-name: my-tsubuyaki-app
+#          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.APP_NAME }}:${{ github.run_number }}
+#
+#      - name: Render ECS task definition nginx
+#        id: task-def-nginx
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        with:
+#          task-definition: ${{ steps.task-def-tomcat.outputs.task-definition }}
+#          container-name: my-nginx
+#          image: ${{ secrets.AWS_ECR_REPO }}/${{ env.WEB_NAME }}:${{ github.run_number }}
+#
+#      - name: Update ECS service
+#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+#        with:
+#          task-definition: ${{ steps.task-def-nginx.outputs.task-definition }}
+#          service: my-tsubuyaki-app-task-service-3xf98aid
+#          cluster: my-tsubuyaki-app
+#          wait-for-service-stability: true

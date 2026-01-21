@@ -26,4 +26,12 @@ public class MutterLogic {
 		
 		return result;
 	}
+	
+	public DbOpeResult delMutter(int userId, int mutterId) {
+		
+		MuttersDAO dao = new MuttersDAO();
+		DbOpeResult result = dao.delMutter(userId, mutterId);
+		
+		return result;
+	}
 }

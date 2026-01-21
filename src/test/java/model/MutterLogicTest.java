@@ -76,4 +76,43 @@ class MutterLogicTest {
             assertEquals(DbOpeResult.ERROR, result);
         }
     }
+    
+    // ---------------------------
+    // delMutter() SUCCESS
+    // ---------------------------
+    @Test
+    void testDelMutter_success() {
+
+        try (MockedConstruction<MuttersDAO> mocked =
+                mockConstruction(MuttersDAO.class, (mock, context) -> {
+                    when(mock.delMutter(10, 1)).thenReturn(DbOpeResult.SUCCESS);
+                })) {
+
+            MutterLogic logic = new MutterLogic();
+            DbOpeResult result = logic.delMutter(10, 1);
+
+            assertEquals(DbOpeResult.SUCCESS, result);
+        }
+    }
+
+    // ---------------------------
+    // delMutter() ERROR
+    // ---------------------------
+    @Test
+    void testDelMutter_error() {
+
+        try (MockedConstruction<MuttersDAO> mocked =
+                mockConstruction(MuttersDAO.class, (mock, context) -> {
+                    when(mock.delMutter(10, 1)).thenReturn(DbOpeResult.ERROR);
+                })) {
+
+            MutterLogic logic = new MutterLogic();
+            DbOpeResult result = logic.delMutter(10, 1);
+
+            assertEquals(DbOpeResult.ERROR, result);
+        }
+    }
+
+    
+    
 }

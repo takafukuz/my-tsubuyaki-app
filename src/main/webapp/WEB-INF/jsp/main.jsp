@@ -25,6 +25,7 @@
 <main>
     <c:if test="${not empty errorMsg}">
         <div class="error"><c:out value="${errorMsg}"/></div>
+        <c:remove var="errorMsg" scope="session"/>
     </c:if>
 
     <section class="post-form">
@@ -44,11 +45,36 @@
                 <span class="user"><c:out value="${mutter.userName}"/></span>
                 <span class="text"><c:out value="${mutter.mutter}"/></span>
                 <span class="date">
-                    <fmt:formatDate value="${mutter.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                    <fmt:formatDate value="${mutter.createdAt}" pattern="yyyy-MM-dd HH:mm:ss" timeZone="Asia/Tokyo"/>
                 </span>
+                <c:if test="${loginUser.userId == mutter.userId }"><span class="deleteBtn" data-mutter-id="${mutter.mutterId}" 
+                data-mutter="${mutter.mutter }" data-user-id="${mutter.userId }">🗑️</span></c:if>
             </div>
         </c:forEach>
     </section>
+    
+    <!-- つぶやき削除用フォーム -->
+	<form id="delMutterForm" action="${pageContext.request.contextPath}/del-mutter" method="post">
+	    <input type="hidden" name="targetMutterId" id="targetMutterId">
+	    <input type="hidden" name="targetUserId" id="targetUserId">
+	</form>
+    
 </main>
+<script>
+	document.querySelectorAll(".deleteBtn").forEach(function(element){
+	    element.addEventListener("click", function() {
+	    	const targetMutterId = this.dataset.mutterId;  // ← 削除対象ID
+	    	const targetUserId = this.dataset.userId;  // ← 削除対象ID
+	    	const targetMutter = this.dataset.mutter;  // ← 削除対象ID
+	        if (confirm("つぶやき\n「" + targetMutter + "」\nを削除しますか？")) {
+		        // 削除対象IDをフォームの値に入れる
+	            document.getElementById("targetMutterId").value = targetMutterId;
+	            document.getElementById("targetUserId").value = targetUserId;
+	            // フォーム送信（POST）
+	            document.getElementById("delMutterForm").submit();
+	        }
+	    });
+	});
+</script>
 </body>
 </html>

@@ -121,4 +121,36 @@ class MuttersDAOTest {
 
         assertThrows(RuntimeException.class, () -> dao.addMutter(10, "テスト投稿"));
     }
+    
+	// ---------------------------
+	// delMutter()
+	// ---------------------------
+	@Test
+	void testDelMutter_success() throws Exception {
+	    when(conn.prepareStatement(anyString())).thenReturn(pstmt);
+	    when(pstmt.executeUpdate()).thenReturn(1);
+	
+	    DbOpeResult result = dao.delMutter(10, 1);
+	
+	    assertEquals(DbOpeResult.SUCCESS, result);
+	}
+	
+	@Test
+	void testDelMutter_error() throws Exception {
+	    when(conn.prepareStatement(anyString())).thenReturn(pstmt);
+	    when(pstmt.executeUpdate()).thenReturn(0);
+	
+	    DbOpeResult result = dao.delMutter(10, 1);
+	
+	    assertEquals(DbOpeResult.ERROR, result);
+	}
+	
+	@Test
+	void testDelMutter_sqlException() throws Exception {
+	    when(conn.prepareStatement(anyString())).thenThrow(new SQLException());
+	
+	    assertThrows(RuntimeException.class, () -> dao.delMutter(10, 1));
+	}
+    
+    
 }

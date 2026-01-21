@@ -74,9 +74,33 @@ public class MuttersDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		}	
+	}
+	
+	// つぶやきの削除
+	public DbOpeResult delMutter(int userId, int mutterId) {
+		
+		String sql = "delete from mutters where userid = ? and mutterid = ?";
+		
+		try (Connection conn = ConnectionFactory.getConnection();
+				PreparedStatement pStmt = conn.prepareStatement(sql)){
+			
+			pStmt.setInt(1, userId);
+			pStmt.setInt(2, mutterId);
+			
+			int result = pStmt.executeUpdate();
+			
+			if (result != 1) {
+				return DbOpeResult.ERROR;
+			} else {
+				return DbOpeResult.SUCCESS;
+			}
+
+	
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		
-		
 	}
 
 }

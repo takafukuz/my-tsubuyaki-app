@@ -40,6 +40,22 @@ public class ChangePasswordServlet extends HttpServlet {
 		String password = request.getParameter("password");
 		String confirmPassword = request.getParameter("confirmPassword");
 		
+		// パスワードがnullの場合
+		if ( password == null || confirmPassword == null ) {
+			request.setAttribute("errorMsg", "パスワードが入力されていません。");
+			RequestDispatcher disp = request.getRequestDispatcher("/WEB-INF/jsp/change-password.jsp");
+			disp.forward(request, response);
+			return;
+		}
+		
+		// パスワードの文字数チェック
+		if ( password.length() < 8 ) {
+			request.setAttribute("errorMsg", "パスワードは8文字以上で入力してください。");
+			RequestDispatcher disp = request.getRequestDispatcher("/WEB-INF/jsp/change-password.jsp");
+			disp.forward(request, response);
+			return;
+		}
+		
 		// 確認パスワードが食い違う場合
 		if (!password.equals(confirmPassword)) {
 			request.setAttribute("errorMsg","入力されたパスワードが一致しません");
@@ -59,7 +75,7 @@ public class ChangePasswordServlet extends HttpServlet {
 					
 		} else {
 			request.setAttribute("errorMsg","パスワード変更に失敗しました");
-			RequestDispatcher disp = request.getRequestDispatcher(request.getContextPath()+"/change-password");
+			RequestDispatcher disp = request.getRequestDispatcher("/WEB-INF/jsp/change-password.jsp");
 			disp.forward(request, response);
 		}
 		

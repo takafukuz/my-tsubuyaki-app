@@ -4,159 +4,231 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 
 import common.DbOpeResult;
 import entity.AuthInfo;
-import infrastructure.ConnectionFactory;
+import infrastructure.AppConfig;
+import infrastructure.DynamoDbClientHolder;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.CancellationReason;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
+import software.amazon.awssdk.services.dynamodb.model.TransactWriteItemsRequest;
+import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException;
+import software.amazon.awssdk.services.dynamodb.model.UpdateItemRequest;
 
 class UsersDAOTest {
 
-    private UsersDAO dao;
-    private Connection conn;
-    private PreparedStatement pstmt;
-    private ResultSet rs;
+    @Mock
+    DynamoDbClient mockDynamo;
 
-    private MockedStatic<ConnectionFactory> mockedFactory;
+    @Mock
+    AppConfig mockConfig;
+
+    private UsersDAO dao;
+
+    private MockedStatic<DynamoDbClientHolder> dynamoHolderMock;
+    private MockedStatic<AppConfig> appConfigMock;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        dynamoHolderMock = mockStatic(DynamoDbClientHolder.class);
+        appConfigMock = mockStatic(AppConfig.class);
+
+        dynamoHolderMock.when(DynamoDbClientHolder::getInstance).thenReturn(mockDynamo);
+        appConfigMock.when(AppConfig::getInstance).thenReturn(mockConfig);
+
+        when(mockConfig.getUsersTable()).thenReturn("UsersTable");
+        when(mockConfig.getUsernamesTable()).thenReturn("UsernamesTable");
+
         dao = new UsersDAO();
-
-        conn = mock(Connection.class);
-        pstmt = mock(PreparedStatement.class);
-        rs = mock(ResultSet.class);
-
-        mockedFactory = mockStatic(ConnectionFactory.class);
-        mockedFactory.when(ConnectionFactory::getConnection).thenReturn(conn);
     }
 
     @AfterEach
     void tearDown() {
-        mockedFactory.close();
+        dynamoHolderMock.close();
+        appConfigMock.close();
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // getPassword()
-    // ---------------------------
+    // ---------------------------------------------------------
     @Test
-    void testGetPassword_success() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeQuery()).thenReturn(rs);
+    void testGetPasswordSuccess() {
 
-        when(rs.next()).thenReturn(true);
-        when(rs.getString("password_hash")).thenReturn("hash123");
-        when(rs.getString("salt")).thenReturn("salt123");
-        when(rs.getInt("userid")).thenReturn(10);
+        Map<String, AttributeValue> item = Map.of(
+                "password_hash", AttributeValue.fromS("hash123"),
+                "salt", AttributeValue.fromS("salt123"),
+                "userid", AttributeValue.fromS("u1")
+        );
 
-        AuthInfo result = dao.getPassword("taro");
+        QueryResponse response = QueryResponse.builder()
+                .items(item)
+                .build();
 
-        assertNotNull(result);
-        assertEquals("hash123", result.getPassword());
-        assertEquals("salt123", result.getSalt());
-        assertEquals(10, result.getUserId());
+        when(mockDynamo.query(any(QueryRequest.class))).thenReturn(response);
+
+        AuthInfo auth = dao.getPassword("alice");
+
+        assertNotNull(auth);
+        assertEquals("hash123", auth.getPassword());
+        assertEquals("salt123", auth.getSalt());
+        assertEquals("u1", auth.getUserId());
     }
 
     @Test
-    void testGetPassword_notFound() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeQuery()).thenReturn(rs);
+    void testGetPasswordNotFound() {
 
-        when(rs.next()).thenReturn(false);
+        QueryResponse response = QueryResponse.builder()
+                .items(List.of()) // 空リスト
+                .build();
 
-        AuthInfo result = dao.getPassword("unknown");
-        assertNull(result);
+        when(mockDynamo.query(any(QueryRequest.class))).thenReturn(response);
+
+        AuthInfo auth = dao.getPassword("unknown");
+
+        assertNull(auth);
     }
 
     @Test
-    void testGetPassword_sqlException() throws Exception {
-        when(conn.prepareStatement(anyString())).thenThrow(new SQLException());
+    void testGetPasswordError() {
 
-        AuthInfo result = dao.getPassword("taro");
-        assertNull(result);
+        when(mockDynamo.query(any(QueryRequest.class)))
+                .thenThrow(DynamoDbException.builder().build());
+
+        AuthInfo auth = dao.getPassword("error");
+
+        assertNull(auth);
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // updatePassword()
-    // ---------------------------
+    // ---------------------------------------------------------
     @Test
-    void testUpdatePassword_success() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeUpdate()).thenReturn(1);
+    void testUpdatePasswordSuccess() {
 
-        DbOpeResult result = dao.updatePassword(1, "hash", "salt");
+        DbOpeResult result = dao.updatePassword("u1", "newHash", "newSalt");
 
         assertEquals(DbOpeResult.SUCCESS, result);
+        verify(mockDynamo).updateItem(any(UpdateItemRequest.class));
     }
 
     @Test
-    void testUpdatePassword_error() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeUpdate()).thenReturn(0);
+    void testUpdatePasswordError() {
 
-        DbOpeResult result = dao.updatePassword(1, "hash", "salt");
+        doThrow(DynamoDbException.builder().build())
+                .when(mockDynamo).updateItem(any(UpdateItemRequest.class));
+
+        DbOpeResult result = dao.updatePassword("u1", "newHash", "newSalt");
 
         assertEquals(DbOpeResult.ERROR, result);
     }
 
-    @Test
-    void testUpdatePassword_sqlException() throws Exception {
-        when(conn.prepareStatement(anyString())).thenThrow(new SQLException());
-
-        DbOpeResult result = dao.updatePassword(1, "hash", "salt");
-
-        assertEquals(DbOpeResult.ERROR, result);
-    }
-
-    // ---------------------------
+    // ---------------------------------------------------------
     // updateUserName()
-    // ---------------------------
+    // ---------------------------------------------------------
     @Test
-    void testUpdateUserName_success() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeUpdate()).thenReturn(1);
+    void testUpdateUserNameSuccess() {
 
-        DbOpeResult result = dao.updateUserName(1, "taro");
+        // getItem → 現在のユーザー名を返す
+        Map<String, AttributeValue> userItem = Map.of(
+                "username", AttributeValue.fromS("oldName")
+        );
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(userItem).build());
+
+        // transactWriteItems → 成功
+        DbOpeResult result = dao.updateUserName("u1", "newName");
 
         assertEquals(DbOpeResult.SUCCESS, result);
+        verify(mockDynamo).transactWriteItems(any(TransactWriteItemsRequest.class));
     }
 
     @Test
-    void testUpdateUserName_error() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeUpdate()).thenReturn(0);
+    void testUpdateUserNameUserNotFound() {
 
-        DbOpeResult result = dao.updateUserName(1, "taro");
+        // username が null → ERROR
+        Map<String, AttributeValue> userItem = Map.of(
+                "username", AttributeValue.fromS("")
+        );
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(userItem).build());
+
+        DbOpeResult result = dao.updateUserName("u1", "newName");
 
         assertEquals(DbOpeResult.ERROR, result);
     }
 
     @Test
-    void testUpdateUserName_duplicate() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
+    void testUpdateUserNameSameName() {
 
-        SQLException ex = new SQLException("duplicate", "state", 23505);
-        when(pstmt.executeUpdate()).thenThrow(ex);
+        Map<String, AttributeValue> userItem = Map.of(
+                "username", AttributeValue.fromS("sameName")
+        );
 
-        DbOpeResult result = dao.updateUserName(1, "taro");
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(userItem).build());
+
+        DbOpeResult result = dao.updateUserName("u1", "sameName");
+
+        assertEquals(DbOpeResult.ERROR, result);
+    }
+
+    @Test
+    void testUpdateUserNameDuplicate() {
+
+        Map<String, AttributeValue> userItem = Map.of(
+                "username", AttributeValue.fromS("oldName")
+        );
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(userItem).build());
+
+        // トランザクション失敗（重複）
+        TransactionCanceledException ex = TransactionCanceledException.builder()
+                .cancellationReasons(
+                        List.of(CancellationReason.builder().code("ConditionalCheckFailed").build())
+                )
+                .build();
+
+        doThrow(ex).when(mockDynamo).transactWriteItems(any(TransactWriteItemsRequest.class));
+
+        DbOpeResult result = dao.updateUserName("u1", "newName");
 
         assertEquals(DbOpeResult.DUPLICATE, result);
     }
-
+    
     @Test
-    void testUpdateUserName_sqlException() throws Exception {
-        when(conn.prepareStatement(anyString())).thenThrow(new SQLException());
+    void testUpdateUserName_UserNotFound() {
 
-        DbOpeResult result = dao.updateUserName(1, "taro");
+        // getItem の返却値に username が無い（＝ユーザーが存在しない扱い）
+        Map<String, AttributeValue> userItem = Map.of(
+                "username", AttributeValue.fromS("")   // 空文字
+        );
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(userItem).build());
+
+        DbOpeResult result = dao.updateUserName("u1", "newName");
 
         assertEquals(DbOpeResult.ERROR, result);
     }
+
 }

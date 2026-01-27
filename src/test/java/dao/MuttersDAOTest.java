@@ -4,153 +4,191 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 
 import common.DbOpeResult;
 import entity.Mutter;
-import infrastructure.ConnectionFactory;
+import infrastructure.AppConfig;
+import infrastructure.DynamoDbClientHolder;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException;
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
+import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 
 class MuttersDAOTest {
 
-    private MuttersDAO dao;
-    private Connection conn;
-    private PreparedStatement pstmt;
-    private ResultSet rs;
+    @Mock
+    DynamoDbClient mockDynamo;
 
-    private MockedStatic<ConnectionFactory> mockedFactory;
+    @Mock
+    AppConfig mockConfig;
+
+    private MuttersDAO dao;
+
+    private MockedStatic<DynamoDbClientHolder> dynamoHolderMock;
+    private MockedStatic<AppConfig> appConfigMock;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        // static メソッドのモック
+        dynamoHolderMock = mockStatic(DynamoDbClientHolder.class);
+        appConfigMock = mockStatic(AppConfig.class);
+
+        dynamoHolderMock.when(DynamoDbClientHolder::getInstance).thenReturn(mockDynamo);
+        appConfigMock.when(AppConfig::getInstance).thenReturn(mockConfig);
+
+        when(mockConfig.getUsersTable()).thenReturn("UsersTable");
+        when(mockConfig.getMuttersTable()).thenReturn("MuttersTable");
+
         dao = new MuttersDAO();
-
-        conn = mock(Connection.class);
-        pstmt = mock(PreparedStatement.class);
-        rs = mock(ResultSet.class);
-
-        mockedFactory = mockStatic(ConnectionFactory.class);
-        mockedFactory.when(ConnectionFactory::getConnection).thenReturn(conn);
     }
 
     @AfterEach
     void tearDown() {
-        mockedFactory.close();
+        dynamoHolderMock.close();
+        appConfigMock.close();
     }
 
-    // ---------------------------
+    // ---------------------------------------------------------
     // selectAllMutters()
-    // ---------------------------
+    // ---------------------------------------------------------
     @Test
-    void testSelectAllMutters_success() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeQuery()).thenReturn(rs);
+    void testSelectAllMutters() {
 
-        // 1件だけ返すケース
-        when(rs.next()).thenReturn(true, false);
-        when(rs.getInt("mutterid")).thenReturn(1);
-        when(rs.getInt("userid")).thenReturn(10);
-        when(rs.getString("username")).thenReturn("taro");
-        when(rs.getString("mutter")).thenReturn("こんにちは");
-        when(rs.getTimestamp("createdAt")).thenReturn(new Timestamp(1000));
+        Map<String, AttributeValue> item = Map.of(
+                "mutter_id", AttributeValue.fromS("m1"),
+                "userid", AttributeValue.fromS("u1"),
+                "username", AttributeValue.fromS("Alice"),
+                "mutter", AttributeValue.fromS("Hello"),
+                "created_at", AttributeValue.fromS("2024-01-01T10:00:00Z")
+        );
 
-        List<Mutter> list = dao.selectAllMutters();
+        QueryResponse response = QueryResponse.builder()
+                .items(item)
+                .build();
 
-        assertEquals(1, list.size());
-        Mutter m = list.get(0);
-        assertEquals(1, m.getMutterId());
-        assertEquals(10, m.getUserId());
-        assertEquals("taro", m.getUserName());
-        assertEquals("こんにちは", m.getMutter());
+        when(mockDynamo.query(any(QueryRequest.class))).thenReturn(response);
+
+        List<Mutter> result = dao.selectAllMutters();
+
+        assertEquals(1, result.size());
+        Mutter m = result.get(0);
+
+        assertEquals("m1", m.getMutterId());
+        assertEquals("u1", m.getUserId());
+        assertEquals("Alice", m.getUserName());
+        assertEquals("Hello", m.getMutter());
+        assertEquals(Timestamp.from(Instant.parse("2024-01-01T10:00:00Z")), m.getCreatedAt());
     }
 
+    // ---------------------------------------------------------
+    // addMutter() SUCCESS
+    // ---------------------------------------------------------
     @Test
-    void testSelectAllMutters_empty() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeQuery()).thenReturn(rs);
+    void testAddMutterSuccess() {
 
-        // 結果が0件
-        when(rs.next()).thenReturn(false);
+        Map<String, AttributeValue> userItem = Map.of(
+                "username", AttributeValue.fromS("Alice")
+        );
 
-        List<Mutter> list = dao.selectAllMutters();
+        GetItemResponse getItemResponse = GetItemResponse.builder()
+                .item(userItem)
+                .build();
 
-        assertTrue(list.isEmpty());
-    }
+        when(mockDynamo.getItem(any(GetItemRequest.class))).thenReturn(getItemResponse);
 
-    @Test
-    void testSelectAllMutters_sqlException() throws Exception {
-        when(conn.prepareStatement(anyString())).thenThrow(new SQLException());
-
-        assertThrows(RuntimeException.class, () -> dao.selectAllMutters());
-    }
-
-    // ---------------------------
-    // addMutter()
-    // ---------------------------
-    @Test
-    void testAddMutter_success() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeUpdate()).thenReturn(1);
-
-        DbOpeResult result = dao.addMutter(10, "テスト投稿");
+        DbOpeResult result = dao.addMutter("u1", "Hello");
 
         assertEquals(DbOpeResult.SUCCESS, result);
+
+        ArgumentCaptor<PutItemRequest> captor = ArgumentCaptor.forClass(PutItemRequest.class);
+        verify(mockDynamo).putItem(captor.capture());
+
+        PutItemRequest req = captor.getValue();
+        assertEquals("MuttersTable", req.tableName());
+        assertEquals("u1", req.item().get("userid").s());
+        assertEquals("Alice", req.item().get("username").s());
+        assertEquals("Hello", req.item().get("mutter").s());
+        assertEquals("MUTTER", req.item().get("entity_type").s());
     }
 
+    // ---------------------------------------------------------
+    // addMutter() ERROR
+    // ---------------------------------------------------------
     @Test
-    void testAddMutter_error() throws Exception {
-        when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-        when(pstmt.executeUpdate()).thenReturn(0);
+    void testAddMutterError() {
 
-        DbOpeResult result = dao.addMutter(10, "テスト投稿");
+        Map<String, AttributeValue> userItem = Map.of(
+                "username", AttributeValue.fromS("Alice")
+        );
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(userItem).build());
+
+        doThrow(DynamoDbException.builder().build())
+                .when(mockDynamo).putItem(any(PutItemRequest.class));
+
+        DbOpeResult result = dao.addMutter("u1", "Hello");
 
         assertEquals(DbOpeResult.ERROR, result);
     }
 
+    // ---------------------------------------------------------
+    // delMutter() SUCCESS
+    // ---------------------------------------------------------
     @Test
-    void testAddMutter_sqlException() throws Exception {
-        when(conn.prepareStatement(anyString())).thenThrow(new SQLException());
+    void testDelMutterSuccess() {
 
-        assertThrows(RuntimeException.class, () -> dao.addMutter(10, "テスト投稿"));
+        DbOpeResult result = dao.delMutter("u1", "m1");
+
+        assertEquals(DbOpeResult.SUCCESS, result);
+        verify(mockDynamo).deleteItem(any(DeleteItemRequest.class));
     }
-    
-	// ---------------------------
-	// delMutter()
-	// ---------------------------
-	@Test
-	void testDelMutter_success() throws Exception {
-	    when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-	    when(pstmt.executeUpdate()).thenReturn(1);
-	
-	    DbOpeResult result = dao.delMutter(10, 1);
-	
-	    assertEquals(DbOpeResult.SUCCESS, result);
-	}
-	
-	@Test
-	void testDelMutter_error() throws Exception {
-	    when(conn.prepareStatement(anyString())).thenReturn(pstmt);
-	    when(pstmt.executeUpdate()).thenReturn(0);
-	
-	    DbOpeResult result = dao.delMutter(10, 1);
-	
-	    assertEquals(DbOpeResult.ERROR, result);
-	}
-	
-	@Test
-	void testDelMutter_sqlException() throws Exception {
-	    when(conn.prepareStatement(anyString())).thenThrow(new SQLException());
-	
-	    assertThrows(RuntimeException.class, () -> dao.delMutter(10, 1));
-	}
-    
-    
+
+    // ---------------------------------------------------------
+    // delMutter() NOT_FOUND
+    // ---------------------------------------------------------
+    @Test
+    void testDelMutterNotFound() {
+
+        doThrow(ConditionalCheckFailedException.builder().build())
+                .when(mockDynamo).deleteItem(any(DeleteItemRequest.class));
+
+        DbOpeResult result = dao.delMutter("u1", "m1");
+
+        assertEquals(DbOpeResult.NOT_FOUND, result);
+    }
+
+    // ---------------------------------------------------------
+    // delMutter() ERROR
+    // ---------------------------------------------------------
+    @Test
+    void testDelMutterError() {
+
+        doThrow(DynamoDbException.builder().build())
+                .when(mockDynamo).deleteItem(any(DeleteItemRequest.class));
+
+        DbOpeResult result = dao.delMutter("u1", "m1");
+
+        assertEquals(DbOpeResult.ERROR, result);
+    }
 }

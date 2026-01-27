@@ -4,23 +4,23 @@ import java.io.Serializable;
 
 public class UserInfo implements Serializable{
 
-	private int userId ;
+	private String userId ;
 	private String userName;
 	private int adminPriv;
 	
 	public UserInfo(){};
 	
-	public UserInfo(int userId,String userName,int adminPriv) {
+	public UserInfo(String userId,String userName,int adminPriv) {
 		this.userId = userId;
 		this.userName = userName;
 		this.adminPriv = adminPriv;
 	}
 	
-	public int getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 	
-	public void setUserId(int userId) {
+	public void setUserId(String userId) {
 		this.userId = userId;
 	}
 	

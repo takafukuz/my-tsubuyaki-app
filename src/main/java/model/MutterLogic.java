@@ -19,7 +19,7 @@ public class MutterLogic {
 		return mutterList;
 	}
 	
-	public DbOpeResult addMutter(int userId,String text) {
+	public DbOpeResult addMutter(String userId,String text) {
 		
 		MuttersDAO dao = new MuttersDAO();
 		DbOpeResult result = dao.addMutter(userId,text);
@@ -27,7 +27,7 @@ public class MutterLogic {
 		return result;
 	}
 	
-	public DbOpeResult delMutter(int userId, int mutterId) {
+	public DbOpeResult delMutter(String userId, String mutterId) {
 		
 		MuttersDAO dao = new MuttersDAO();
 		DbOpeResult result = dao.delMutter(userId, mutterId);

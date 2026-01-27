@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.dynamodb.model.BatchGetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.BatchGetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.CancellationReason;
 import software.amazon.awssdk.services.dynamodb.model.Delete;
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
@@ -72,7 +73,7 @@ public class AdminUsersDAO {
 			return authInfo;
 			
 		} catch (DynamoDbException e) {
-			System.err.println(e.getMessage());
+			System.err.println(e.toString());
 		    return null;
 		}
 		
@@ -119,7 +120,7 @@ public class AdminUsersDAO {
 			}
 			return userList;
 		} catch (DynamoDbException e){
-			System.err.println(e.getMessage());
+			System.err.println(e.toString());
 			// エラー時は空のリストを返す。NPE対策
 			return Collections.emptyList();
 		}
@@ -158,7 +159,7 @@ public class AdminUsersDAO {
 			
 			
 		} catch (DynamoDbException e) {
-			System.err.println(e.getMessage());
+			System.err.println(e.toString());
 			return null;
 		}
 	}
@@ -183,7 +184,7 @@ public class AdminUsersDAO {
 			Map<String, AttributeValue> queryRes = dynamoDb.getItem(queryReq).item();
 			currentUserName = queryRes.get("username").s();
 		} catch (DynamoDbException e) {
-			System.err.println(e.getMessage());
+			System.err.println(e.toString());
 			return DbOpeResult.ERROR;
 		}
 		
@@ -243,7 +244,7 @@ public class AdminUsersDAO {
 			return DbOpeResult.SUCCESS;
 			
 		} catch (TransactionCanceledException e){
-			System.err.println(e.getMessage());
+			System.err.println(e.toString());
 			if (e.hasCancellationReasons()) {
 				List<CancellationReason> reasons = e.cancellationReasons();
 				if (reasons.size() > 0 && "ConditionalCheckFailed".equals(reasons.get(0).code())) {
@@ -308,7 +309,8 @@ public class AdminUsersDAO {
 		try {
 			dynamoDb.transactWriteItems(tx);
 			return DbOpeResult.SUCCESS;
-		} catch (TransactionCanceledException e){			
+		} catch (TransactionCanceledException e){
+			System.err.println(e.toString());
 			if (e.hasCancellationReasons()) {
 				List<CancellationReason> reasons = e.cancellationReasons();
 				if (reasons.size() > 0 && "ConditionalCheckFailed".equals(reasons.get(0).code())) {
@@ -341,28 +343,41 @@ public class AdminUsersDAO {
 		Map<String, KeysAndAttributes> requestItems = new HashMap<>();
 		requestItems.put(usersTable, kaa);
 		
-		// Batchリクエストを行う
+		// Batchリクエスト準備
 		BatchGetItemRequest request = BatchGetItemRequest.builder().requestItems(requestItems).build();
 		
-		BatchGetItemResponse response;
+		// 結果マージ用Map
+		Map<String, List<Map<String, AttributeValue>>> mergedResponses = new HashMap<>();
 		
 		try {
-			response = dynamoDb.batchGetItem(request);
+			BatchGetItemResponse response = dynamoDb.batchGetItem(request);
+			
+			// 初回の結果をmergedResponseに入れる
+			response.responses().forEach((table, items) -> {
+				mergedResponses.computeIfAbsent(table, v -> new ArrayList<>()).addAll(items);
+				});
 			
 			// 実行されなかった分について、改めてitemsを作り、再実行する
 			Map<String, KeysAndAttributes> retryItems = response.unprocessedKeys();
 			
 			// （残作業）上限ループ回数を設定する
-			while (!retryItems.isEmpty()) {
+			
+			int loopCount = 0;
+			int loopMaxCount = 5;
+			
+			while (!retryItems.isEmpty() && loopCount < loopMaxCount) {
 				BatchGetItemRequest retryRequest = BatchGetItemRequest.builder().requestItems(retryItems).build();
 				BatchGetItemResponse retryResponse = dynamoDb.batchGetItem(retryRequest);
 				
-				// 再実行の結果を、初回の結果に追加する
+				// 再実行の結果を、結果に追加する
 				// 初回の結果にkey（テーブル名）がなければ、キーを作成して、値を入れる
-				retryResponse.responses().forEach((table, items) -> { response.responses().computeIfAbsent(table, v -> new ArrayList<>()).addAll(items);});
+				retryResponse.responses().forEach((table, items) -> {
+					mergedResponses.computeIfAbsent(table, v -> new ArrayList<>()).addAll(items);});
 				
 				// リトライでも実行されなかった分をretryItemsに入れる（なくなるまでループが回る）
 				retryItems = retryResponse.unprocessedKeys();
+				
+				loopCount ++;
 				
 			}
 		
@@ -376,7 +391,7 @@ public class AdminUsersDAO {
 		
 		// responses()からテーブル名を指定して取り出す
 		// 要素ごとにMapになっている
-		List<Map<String, AttributeValue>> items = response.responses().get(usersTable);
+		List<Map<String, AttributeValue>> items = mergedResponses.get(usersTable);
 		
 		for ( Map<String, AttributeValue> item : items) {
 			UserInfo userInfo = new UserInfo(
@@ -389,5 +404,38 @@ public class AdminUsersDAO {
 		
 		return userInfoList;
 		
+	}
+	//ユーザー削除処理
+	public int delUser(List<String> userIds) {
+		
+		int resultCount = 0;
+		
+		// ループを回して削除する　件数をカウントする
+		if (userIds == null || userIds.isEmpty()) {
+			return resultCount;
+		}
+		
+
+		for (String userId : userIds) {
+			
+			Map<String, AttributeValue> key = Map.of("userid", AttributeValue.fromS(userId));
+			
+			try {
+				DeleteItemRequest request = DeleteItemRequest.builder()
+						.tableName(usersTable)
+						.key(key)
+						.conditionExpression("attribute_exists(userid)")
+						.build();
+				
+				dynamoDb.deleteItem(request);
+				
+				resultCount++; 
+			} catch (DynamoDbException e){
+				// エラー終了しない
+				System.err.println("ユーザーID：" + userId + "の削除時にエラー：" + e.toString());
+			}
+		}
+		
+		return resultCount;
 	}
 }

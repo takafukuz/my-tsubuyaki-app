@@ -4,111 +4,85 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.SecretKeyFactory;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 
 import common.DbOpeResult;
 import dao.UsersDAO;
 
-class UpdateUserInfoLogicTest {
+public class UpdateUserInfoLogicTest {
 
-    // ---------------------------
-    // changePassword() 正常系
-    // ---------------------------
+    private UpdateUserInfoLogic logic;
+
+    @BeforeEach
+    void setup() {
+        logic = new UpdateUserInfoLogic();
+    }
+
+    // -----------------------------
+    // changePassword のテスト
+    // -----------------------------
+
     @Test
     void testChangePassword_success() {
-
-        try (MockedConstruction<UsersDAO> mocked =
-                mockConstruction(UsersDAO.class, (mock, context) -> {
-                    when(mock.updatePassword(anyInt(), anyString(), anyString()))
-                            .thenReturn(DbOpeResult.SUCCESS);
+        try (MockedConstruction<UsersDAO> mocked = mockConstruction(UsersDAO.class,
+                (mock, context) -> {
+                    when(mock.updatePassword(anyString(), anyString(), anyString()))
+                        .thenReturn(DbOpeResult.SUCCESS);
                 })) {
 
-            UpdateUserInfoLogic logic = new UpdateUserInfoLogic();
-            DbOpeResult result = logic.changePassword(10, "newpass");
+            DbOpeResult result = logic.changePassword("u1", "pass123");
 
             assertEquals(DbOpeResult.SUCCESS, result);
         }
     }
 
-    // ---------------------------
-    // changePassword() DAO が ERROR を返す
-    // ---------------------------
     @Test
-    void testChangePassword_daoError() {
+    void testChangePassword_userIdInvalid() {
+        DbOpeResult result1 = logic.changePassword(null, "pass");
+        DbOpeResult result2 = logic.changePassword("", "pass");
 
-        try (MockedConstruction<UsersDAO> mocked =
-                mockConstruction(UsersDAO.class, (mock, context) -> {
-                    when(mock.updatePassword(anyInt(), anyString(), anyString()))
-                            .thenReturn(DbOpeResult.ERROR);
-                })) {
-
-            UpdateUserInfoLogic logic = new UpdateUserInfoLogic();
-            DbOpeResult result = logic.changePassword(10, "newpass");
-
-            assertEquals(DbOpeResult.ERROR, result);
-        }
+        assertEquals(DbOpeResult.ERROR, result1);
+        assertEquals(DbOpeResult.ERROR, result2);
     }
 
-    // ---------------------------
-    // changePassword() ハッシュ生成で例外 → RuntimeException
-    // ---------------------------
     @Test
-    void testChangePassword_hashingException() {
+    void testChangePassword_passwordInvalid() {
+        DbOpeResult result1 = logic.changePassword("u1", null);
+        DbOpeResult result2 = logic.changePassword("u1", "");
 
-        try (MockedStatic<SecretKeyFactory> mockedSkf = mockStatic(SecretKeyFactory.class)) {
-
-            // SecretKeyFactory.getInstance が NoSuchAlgorithmException を投げる
-            mockedSkf.when(() -> SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256"))
-                     .thenThrow(new NoSuchAlgorithmException("hash error"));
-
-            UpdateUserInfoLogic logic = new UpdateUserInfoLogic();
-
-            assertThrows(RuntimeException.class,
-                    () -> logic.changePassword(10, "newpass"));
-        }
+        assertEquals(DbOpeResult.ERROR, result1);
+        assertEquals(DbOpeResult.ERROR, result2);
     }
 
-    // ---------------------------
-    // changeUserName() 正常系
-    // ---------------------------
+    // -----------------------------
+    // changeUserName のテスト
+    // -----------------------------
+
     @Test
     void testChangeUserName_success() {
-
-        try (MockedConstruction<UsersDAO> mocked =
-                mockConstruction(UsersDAO.class, (mock, context) -> {
-                    when(mock.updateUserName(10, "taro"))
-                            .thenReturn(DbOpeResult.SUCCESS);
+        try (MockedConstruction<UsersDAO> mocked = mockConstruction(UsersDAO.class,
+                (mock, context) -> {
+                    when(mock.updateUserName("u1", "Taro"))
+                        .thenReturn(DbOpeResult.SUCCESS);
                 })) {
 
-            UpdateUserInfoLogic logic = new UpdateUserInfoLogic();
-            DbOpeResult result = logic.changeUserName(10, "taro");
+            DbOpeResult result = logic.changeUserName("u1", "Taro");
 
             assertEquals(DbOpeResult.SUCCESS, result);
         }
     }
 
-    // ---------------------------
-    // changeUserName() DAO が ERROR を返す
-    // ---------------------------
     @Test
-    void testChangeUserName_error() {
+    void testChangeUserName_invalidUserId() {
+        assertEquals(DbOpeResult.ERROR, logic.changeUserName(null, "Taro"));
+        assertEquals(DbOpeResult.ERROR, logic.changeUserName("", "Taro"));
+    }
 
-        try (MockedConstruction<UsersDAO> mocked =
-                mockConstruction(UsersDAO.class, (mock, context) -> {
-                    when(mock.updateUserName(10, "taro"))
-                            .thenReturn(DbOpeResult.ERROR);
-                })) {
-
-            UpdateUserInfoLogic logic = new UpdateUserInfoLogic();
-            DbOpeResult result = logic.changeUserName(10, "taro");
-
-            assertEquals(DbOpeResult.ERROR, result);
-        }
+    @Test
+    void testChangeUserName_invalidUserName() {
+        assertEquals(DbOpeResult.ERROR, logic.changeUserName("u1", null));
+        assertEquals(DbOpeResult.ERROR, logic.changeUserName("u1", ""));
     }
 }

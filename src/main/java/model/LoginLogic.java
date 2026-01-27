@@ -15,7 +15,7 @@ public class LoginLogic {
     private static int iterations = 10000; // 反復回数
     private static int keyLength = 256;    // ハッシュの長さ
 	
-	public Integer canLogin(String userName,String password) {
+	public String canLogin(String userName,String password) {
 		
 		try {
 			// ユーザー名をもとにDBから登録パスワードとソルト値を取得

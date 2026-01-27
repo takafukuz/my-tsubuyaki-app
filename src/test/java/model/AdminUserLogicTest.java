@@ -4,16 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import javax.crypto.SecretKeyFactory;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 
 import common.DbOpeResult;
 import dao.AdminUsersDAO;
@@ -21,161 +17,108 @@ import entity.NewUserForm;
 import entity.NewUserInfo;
 import entity.UserInfo;
 
-class AdminUserLogicTest {
+public class AdminUserLogicTest {
 
-    // ---------------------------
-    // getUserList()
-    // ---------------------------
+    private AdminUserLogic logic;
+
+    @BeforeEach
+    void setup() {
+        logic = new AdminUserLogic();
+    }
+
     @Test
-    void testGetUserList_success() {
-
-        List<UserInfo> mockList = Arrays.asList(
-                new UserInfo(1, "taro", 1),
-                new UserInfo(2, "hanako", 0)
-        );
-
-        try (MockedConstruction<AdminUsersDAO> mocked =
-                mockConstruction(AdminUsersDAO.class, (mock, context) -> {
-                    when(mock.getUserList()).thenReturn(mockList);
+    void testGetUserList() {
+        // AdminUsersDAO のコンストラクタをモック化
+        try (MockedConstruction<AdminUsersDAO> mocked = mockConstruction(AdminUsersDAO.class,
+                (mock, context) -> {
+                    when(mock.getUserList()).thenReturn(
+                        Arrays.asList(new UserInfo("u1", "Taro", 0))
+                    );
                 })) {
 
-            AdminUserLogic logic = new AdminUserLogic();
             List<UserInfo> result = logic.getUserList();
 
-            assertEquals(2, result.size());
-            assertEquals("taro", result.get(0).getUserName());
+            assertEquals(1, result.size());
+            assertEquals("u1", result.get(0).getUserId());
         }
     }
 
-    // ---------------------------
-    // getUserInfo()
-    // ---------------------------
     @Test
-    void testGetUserInfo_success() {
-
-        UserInfo mockUser = new UserInfo(10, "taro", 1);
-
-        try (MockedConstruction<AdminUsersDAO> mocked =
-                mockConstruction(AdminUsersDAO.class, (mock, context) -> {
-                    when(mock.getUserInfo(10)).thenReturn(mockUser);
+    void testGetUserInfo() {
+        try (MockedConstruction<AdminUsersDAO> mocked = mockConstruction(AdminUsersDAO.class,
+                (mock, context) -> {
+                    when(mock.getUserInfo("u1"))
+                        .thenReturn(new UserInfo("u1", "Taro", 1));
                 })) {
 
-            AdminUserLogic logic = new AdminUserLogic();
-            UserInfo result = logic.getUserInfo(10);
+            UserInfo result = logic.getUserInfo("u1");
 
             assertNotNull(result);
-            assertEquals("taro", result.getUserName());
+            assertEquals("u1", result.getUserId());
+            assertEquals("Taro", result.getUserName());
         }
     }
 
-    // ---------------------------
-    // addUser() 正常系
-    // ---------------------------
     @Test
     void testAddUser_success() {
-
         NewUserForm form = new NewUserForm();
-        form.setUserName("taro");
+        form.setUserName("Taro");
         form.setAdminPriv(1);
         form.setPassword("pass123");
 
-        try (MockedConstruction<AdminUsersDAO> mockedDao =
-                mockConstruction(AdminUsersDAO.class, (mock, context) -> {
-                    when(mock.addUser(any(NewUserInfo.class))).thenReturn(DbOpeResult.SUCCESS);
+        try (MockedConstruction<AdminUsersDAO> mocked = mockConstruction(AdminUsersDAO.class,
+                (mock, context) -> {
+                    when(mock.addUser(any(NewUserInfo.class)))
+                        .thenReturn(DbOpeResult.SUCCESS);
                 })) {
 
-            AdminUserLogic logic = new AdminUserLogic();
             DbOpeResult result = logic.addUser(form);
 
             assertEquals(DbOpeResult.SUCCESS, result);
         }
     }
 
-    // ---------------------------
-    // addUser() DAO が ERROR を返す
-    // ---------------------------
     @Test
-    void testAddUser_daoError() {
-
+    void testAddUser_error() {
         NewUserForm form = new NewUserForm();
-        form.setUserName("taro");
+        form.setUserName("Taro");
         form.setAdminPriv(1);
-        form.setPassword("pass123");
+        form.setPassword(null); // パスワード null → IllegalArgumentException
 
-        try (MockedConstruction<AdminUsersDAO> mockedDao =
-                mockConstruction(AdminUsersDAO.class, (mock, context) -> {
-                    when(mock.addUser(any(NewUserInfo.class))).thenReturn(DbOpeResult.ERROR);
+        DbOpeResult result = logic.addUser(form);
+
+        assertEquals(DbOpeResult.ERROR, result);
+    }
+
+    @Test
+    void testFindUsersByIds() {
+        List<String> ids = Arrays.asList("u1", "u2");
+
+        try (MockedConstruction<AdminUsersDAO> mocked = mockConstruction(AdminUsersDAO.class,
+                (mock, context) -> {
+                    when(mock.findUsersByIds(ids))
+                        .thenReturn(Arrays.asList(
+                            new UserInfo("u1", "Taro", 0),
+                            new UserInfo("u2", "Hanako", 1)
+                        ));
                 })) {
 
-            AdminUserLogic logic = new AdminUserLogic();
-            DbOpeResult result = logic.addUser(form);
+            List<UserInfo> result = logic.findUsersByIds(ids);
 
-            assertEquals(DbOpeResult.ERROR, result);
+            assertEquals(2, result.size());
         }
     }
 
-    // ---------------------------
-    // addUser() ハッシュ生成で例外 → ERROR
-    // ---------------------------
     @Test
-    void testAddUser_hashingException() {
+    void testDelUser() {
+        List<String> ids = Arrays.asList("u1", "u2");
 
-        NewUserForm form = new NewUserForm();
-        form.setUserName("taro");
-        form.setAdminPriv(1);
-        form.setPassword("pass123");
-
-        // SecretKeyFactory.getInstance が例外を投げるようにモック
-        try (MockedStatic<SecretKeyFactory> mockedSkf = mockStatic(SecretKeyFactory.class)) {
-
-            mockedSkf.when(() -> SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256"))
-                     .thenThrow(new NoSuchAlgorithmException("hash error"));
-
-            AdminUserLogic logic = new AdminUserLogic();
-            DbOpeResult result = logic.addUser(form);
-
-            // addUser は例外を catch して ERROR を返す
-            assertEquals(DbOpeResult.ERROR, result);
-        }
-    }
-
-
-    // ---------------------------
-    // findUsersByIds()
-    // ---------------------------
-    @Test
-    void testFindUsersByIds_success() {
-
-        List<UserInfo> mockList = Collections.singletonList(
-                new UserInfo(1, "taro", 1)
-        );
-
-        try (MockedConstruction<AdminUsersDAO> mocked =
-                mockConstruction(AdminUsersDAO.class, (mock, context) -> {
-                    when(mock.findUsersByIds(Arrays.asList(1))).thenReturn(mockList);
+        try (MockedConstruction<AdminUsersDAO> mocked = mockConstruction(AdminUsersDAO.class,
+                (mock, context) -> {
+                    when(mock.delUser(ids)).thenReturn(2);
                 })) {
 
-            AdminUserLogic logic = new AdminUserLogic();
-            List<UserInfo> result = logic.findUsersByIds(Arrays.asList(1));
-
-            assertEquals(1, result.size());
-            assertEquals("taro", result.get(0).getUserName());
-        }
-    }
-
-    // ---------------------------
-    // delUser()
-    // ---------------------------
-    @Test
-    void testDelUser_success() {
-
-        try (MockedConstruction<AdminUsersDAO> mocked =
-                mockConstruction(AdminUsersDAO.class, (mock, context) -> {
-                    when(mock.delUser(Arrays.asList(1, 2))).thenReturn(2);
-                })) {
-
-            AdminUserLogic logic = new AdminUserLogic();
-            int result = logic.delUser(Arrays.asList(1, 2));
+            int result = logic.delUser(ids);
 
             assertEquals(2, result);
         }

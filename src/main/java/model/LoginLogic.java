@@ -30,10 +30,10 @@ public class LoginLogic {
 				return null;
 			}
 			
-			System.out.println("getPassword終了" + java.time.LocalDateTime.now());
+			// System.out.println("getPassword終了" + java.time.LocalDateTime.now());
 			
 			// 入力されたパスワードを同じソルト値でハッシュ化（ハッシュ文字列はbyte[]にする必要あり）
-			System.out.println("入力パスワードのハッシュ化開始：" + java.time.LocalDateTime.now());
+			// System.out.println("入力パスワードのハッシュ化開始：" + java.time.LocalDateTime.now());
 			
 			byte[] salt = Base64.getDecoder().decode(authInfo.getSalt());
 	

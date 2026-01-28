@@ -20,7 +20,7 @@ public class MutterLogic {
 		
 		MuttersDAO dao = new MuttersDAO();
 		mutterList = dao.selectAllMutters();
-		System.out.println("selectAllMutters終了");
+		// System.out.println("selectAllMutters終了");
 		
 		// つぶやき一覧に出現するuseridについて、現在のusernameを取得し、
 		// mutterListのusernameを更新する
@@ -31,13 +31,16 @@ public class MutterLogic {
 		
 		UsersDAO usersDao = new UsersDAO();
 		Map<String, String> userNameMap = usersDao.findUserByIds(userIds);
-		System.out.println("findUserByIds終了");
+		// System.out.println("findUserByIds終了");
 		
 		for (Mutter m : mutterList) {
-			m.setUserName(userNameMap.get(m.getUserId()));
+			String latestUserName = userNameMap.get(m.getUserId());
+			m.setUserName(latestUserName != null ? latestUserName : "DeletedUser");
+			
+			// System.out.println(m.getUserId() + "：" + m.getUserName());
 		}
 		
-		System.out.println("getAllMutters終了");
+		// System.out.println("getAllMutters終了");
 		return mutterList;
 	}
 	

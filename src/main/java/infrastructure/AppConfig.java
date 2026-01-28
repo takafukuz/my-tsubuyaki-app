@@ -18,6 +18,8 @@ public class AppConfig {
 		this.usersTable = props.getProperty("dynamodb.table.users");
 		this.usernamesTable = props.getProperty("dynamodb.table.usernames");
 		this.muttersTable = props.getProperty("dynamodb.table.mutters");
+		
+		
 	}
 	
 	public static AppConfig getInstance() {

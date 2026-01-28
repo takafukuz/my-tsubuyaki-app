@@ -61,7 +61,7 @@ public class UsersDAO {
 		
 		try {
 			
-			System.out.println("getPasswordのQuery開始" + java.time.LocalDateTime.now());
+			// System.out.println("getPasswordのQuery開始" + java.time.LocalDateTime.now());
 			QueryResponse response = dynamoDb.query(request);
 			
 			// System.out.println("getPasswordのQuery終了" + java.time.LocalDateTime.now());

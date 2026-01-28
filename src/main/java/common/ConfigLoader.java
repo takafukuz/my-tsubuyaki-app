@@ -12,6 +12,7 @@ public class ConfigLoader {
 		
 		// ② 読み込むファイル名を決定
 		String fileName = "db.properties." + env;
+		System.out.println(fileName + "を読み込みます：" + java.time.LocalDateTime.now());
 		
 		// src/main/resources内のファイルに書いてあるkey=valueをpropsに入れて返す
 		try (InputStream is = ConfigLoader.class.getClassLoader().getResourceAsStream(fileName)) {

@@ -17,7 +17,7 @@ public class LoginLogic {
 	
 	public String canLogin(String userName,String password) {
 		
-		System.out.println("canLogin開始" + java.time.LocalDateTime.now());
+		// System.out.println("canLogin開始" + java.time.LocalDateTime.now());
 		
 		try {
 			// ユーザー名をもとにDBから登録パスワードとソルト値を取得
@@ -41,16 +41,16 @@ public class LoginLogic {
 	        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 	        byte[] inputPasswordHash = skf.generateSecret(spec).getEncoded();
 	        
-	        System.out.println("入力パスワードのハッシュ化終了：" + java.time.LocalDateTime.now());
+	        // System.out.println("入力パスワードのハッシュ化終了：" + java.time.LocalDateTime.now());
 			// 入力パスワードと登録パスワードを比較
 	        byte[] collectPasswordHash = Base64.getDecoder().decode(authInfo.getPassword());
 	        
 	        // ログイン成功時は、userIdを返す。失敗時はnullを返す
 	        if (slowEquals(inputPasswordHash,collectPasswordHash)) {
-	        	System.out.println(userName + "のログイン成功"  + java.time.LocalDateTime.now());
+	        	System.out.println(userName + "のログイン成功："  + java.time.LocalDateTime.now());
 	        	return authInfo.getUserId()	;
 	        } else {
-	        	System.out.println(userName + "のログイン失敗"  + java.time.LocalDateTime.now());
+	        	System.out.println(userName + "のログイン失敗："  + java.time.LocalDateTime.now());
 	        	return null;
 	        }
 	        

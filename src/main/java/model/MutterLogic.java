@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,15 @@ import entity.Mutter;
 public class MutterLogic {
 
 	public List<Mutter> getAllMutters(){
+		
+		// 投稿直後につぶやき一覧が更新されない問題（GSI反映遅延）への暫定対応。少し待つ。
+		try {
+		    Thread.sleep(500);
+		} catch (InterruptedException e) {
+			System.out.println(e.getMessage());
+		    Thread.currentThread().interrupt();
+		    return Collections.emptyList();
+		}
 		
 		// つぶやき一覧を取得
 		List<Mutter> mutterList = new ArrayList<>();

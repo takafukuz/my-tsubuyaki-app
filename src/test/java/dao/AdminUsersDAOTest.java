@@ -31,6 +31,7 @@ import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 import software.amazon.awssdk.services.dynamodb.model.TransactWriteItemsRequest;
+import software.amazon.awssdk.services.dynamodb.model.TransactWriteItemsResponse;
 import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException;
 
 class AdminUsersDAOTest {
@@ -386,5 +387,103 @@ class AdminUsersDAOTest {
 
         assertThrows(DynamoDbException.class,
                 () -> dao.findUsersByIds(List.of("u1")));
+    }
+    
+ // -----------------------------
+    // 正常系：1件削除成功
+    // -----------------------------
+    @Test
+    void testDelUser_success() {
+
+        // getItem の戻り値（username を返す）
+        Map<String, AttributeValue> item =
+                Map.of("username", AttributeValue.fromS("taro"));
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(item).build());
+
+        // トランザクション成功
+        when(mockDynamo.transactWriteItems(any(TransactWriteItemsRequest.class)))
+        .thenReturn(TransactWriteItemsResponse.builder().build());
+
+        int result = dao.delUser(List.of("u1"));
+
+        assertEquals(1, result);
+    }
+
+    // -----------------------------
+    // getItem が例外 → 0件
+    // -----------------------------
+    @Test
+    void testDelUser_getItemException() {
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenThrow(DynamoDbException.builder().message("error").build());
+
+        int result = dao.delUser(List.of("u1"));
+
+        assertEquals(0, result);
+    }
+
+    // -----------------------------
+    // getItem が空 → 0件
+    // -----------------------------
+    @Test
+    void testDelUser_itemEmpty() {
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(Map.of()).build());
+
+        int result = dao.delUser(List.of("u1"));
+
+        assertEquals(0, result);
+    }
+
+    // -----------------------------
+    // トランザクション失敗（ConditionalCheckFailed）→ 0件
+    // -----------------------------
+    @Test
+    void testDelUser_transactionConditionalFail() {
+
+        Map<String, AttributeValue> item =
+                Map.of("username", AttributeValue.fromS("taro"));
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(item).build());
+
+        // トランザクション失敗（条件不一致）
+        TransactionCanceledException ex =
+                TransactionCanceledException.builder()
+                        .cancellationReasons(
+                                List.of(CancellationReason.builder()
+                                        .code("ConditionalCheckFailed")
+                                        .build()))
+                        .build();
+
+        doThrow(ex).when(mockDynamo).transactWriteItems(any(TransactWriteItemsRequest.class));
+
+        int result = dao.delUser(List.of("u1"));
+
+        assertEquals(0, result);
+    }
+
+    // -----------------------------
+    // トランザクション失敗（その他の例外）→ 0件
+    // -----------------------------
+    @Test
+    void testDelUser_transactionOtherError() {
+
+        Map<String, AttributeValue> item =
+                Map.of("username", AttributeValue.fromS("taro"));
+
+        when(mockDynamo.getItem(any(GetItemRequest.class)))
+                .thenReturn(GetItemResponse.builder().item(item).build());
+
+        doThrow(DynamoDbException.builder().message("error").build())
+                .when(mockDynamo).transactWriteItems(any(TransactWriteItemsRequest.class));
+
+        int result = dao.delUser(List.of("u1"));
+
+        assertEquals(0, result);
     }
 }

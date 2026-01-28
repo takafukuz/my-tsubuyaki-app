@@ -103,4 +103,13 @@ public class AdminUserLogic {
 		
 	}
 	
+	public DbOpeResult updateUserInfo(UserInfo userInfo) {
+
+		AdminUsersDAO dao = new AdminUsersDAO();
+		DbOpeResult result = dao.updateUserInfo(userInfo);
+		
+		return result;
+		
+	}
+	
 }

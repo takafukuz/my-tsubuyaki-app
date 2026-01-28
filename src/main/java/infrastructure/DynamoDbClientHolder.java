@@ -10,6 +10,7 @@ public class DynamoDbClientHolder {
 	private DynamoDbClientHolder() {}
 
 	public static DynamoDbClient getInstance() {
+		System.out.println("DynamoDbClient.getInstanceが呼び出されました："+ java.time.LocalDateTime.now());
 		return INSTANCE;
 	}
 }

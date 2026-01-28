@@ -38,7 +38,7 @@ public class MainServlet extends HttpServlet {
 		
 		// POSTパラメータを取得
 		request.setCharacterEncoding("UTF-8");
-		int userId = Integer.parseInt(request.getParameter("userId"));
+		String userId = request.getParameter("userId");
 		String text = request.getParameter("text");
 		
 		MutterLogic mutterLogic = new MutterLogic();

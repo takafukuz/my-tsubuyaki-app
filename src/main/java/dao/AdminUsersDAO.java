@@ -20,7 +20,6 @@ import software.amazon.awssdk.services.dynamodb.model.BatchGetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.BatchGetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.CancellationReason;
 import software.amazon.awssdk.services.dynamodb.model.Delete;
-import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
@@ -410,29 +409,79 @@ public class AdminUsersDAO {
 		
 		int resultCount = 0;
 		
-		// ループを回して削除する　件数をカウントする
+		// ループを回して削除し、削除件数を返す
 		if (userIds == null || userIds.isEmpty()) {
 			return resultCount;
 		}
 		
-
 		for (String userId : userIds) {
 			
-			Map<String, AttributeValue> key = Map.of("userid", AttributeValue.fromS(userId));
+			// userIdをもとにUsersから、usernameを取得して、Usernamesの削除対象とする
+			Map<String, AttributeValue> key0 = Map.of("userid", AttributeValue.fromS(userId));
+			
+			GetItemRequest request = GetItemRequest.builder()
+					.tableName(usersTable)
+					.key(key0)
+					.build();
+			
+			Map<String, AttributeValue> item;
+			
+			try { 
+				item = dynamoDb.getItem(request).item();
+			} catch (DynamoDbException e) {
+				System.err.println(e.toString());
+				return resultCount;
+			}
+			
+			if (item.isEmpty() ) {
+				System.err.println("対象ユーザーがusernamesに存在しません");
+				return resultCount;
+			}
+
+			String userName = item.get("username").s();
+
+			Map<String, AttributeValue> key1 = Map.of("username", AttributeValue.fromS(userName));
+
+			Map<String, AttributeValue> key2 = Map.of("userid", AttributeValue.fromS(userId));
+			
+		
+			// トランザクションの開始
+			TransactWriteItemsRequest tx = TransactWriteItemsRequest.builder().transactItems(
+					// usernameをもとにusernamesテーブルから削除
+					TransactWriteItem.builder()
+						.delete(Delete.builder()
+							.tableName(usernamesTable)
+							.key(key1)
+							.conditionExpression("attribute_exists(username)")
+							.build())
+						.build(),
+					// userIdをもとにUsersテーブルから削除		
+					TransactWriteItem.builder()
+						.delete(Delete.builder()
+							.tableName(usersTable)
+							.key(key2)
+							.conditionExpression("attribute_exists(userid)")
+							.build())
+						.build()
+					)
+					.build();
 			
 			try {
-				DeleteItemRequest request = DeleteItemRequest.builder()
-						.tableName(usersTable)
-						.key(key)
-						.conditionExpression("attribute_exists(userid)")
-						.build();
+				dynamoDb.transactWriteItems(tx);
+				resultCount++;
 				
-				dynamoDb.deleteItem(request);
-				
-				resultCount++; 
-			} catch (DynamoDbException e){
-				// エラー終了しない
-				System.err.println("ユーザーID：" + userId + "の削除時にエラー：" + e.toString());
+			} catch (TransactionCanceledException e){
+				System.err.println(e.toString());
+				if (e.hasCancellationReasons()) {
+					List<CancellationReason> reasons = e.cancellationReasons();
+					if (reasons.size() > 0 && "ConditionalCheckFailed".equals(reasons.get(0).code())) {
+						return resultCount;
+					}
+				}
+				return resultCount;
+			} catch (DynamoDbException e) {
+				System.err.println(e.toString());
+				return resultCount;
 			}
 		}
 		

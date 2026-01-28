@@ -1,8 +1,11 @@
 package dao;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import common.DbOpeResult;
 import entity.AuthInfo;
@@ -10,10 +13,13 @@ import infrastructure.AppConfig;
 import infrastructure.DynamoDbClientHolder;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.BatchGetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.BatchGetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.CancellationReason;
 import software.amazon.awssdk.services.dynamodb.model.Delete;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
 import software.amazon.awssdk.services.dynamodb.model.Put;
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
@@ -54,7 +60,11 @@ public class UsersDAO {
 				.build();
 		
 		try {
+			
+			System.out.println("getPasswordのQuery開始" + java.time.LocalDateTime.now());
 			QueryResponse response = dynamoDb.query(request);
+			
+			System.out.println("getPasswordのQuery終了" + java.time.LocalDateTime.now());
 			
 			List<Map<String, AttributeValue>> items = response.items();
 			
@@ -215,6 +225,95 @@ public class UsersDAO {
 	    	}
 	    	return DbOpeResult.ERROR;
 	    }
+	}
+	
+	public Map<String, String> findUserByIds(Set<String> userIds){
+		
+		if (userIds == null || userIds.isEmpty()) {
+		    return Map.of();
+		}
+		
+		// Setの要素ごとに問い合わせ条件（key）を作って、BatchGetItemを行う
+		List<Map<String, AttributeValue>> keys = new ArrayList<>();
+		for (String userId : userIds ) {
+			keys.add(Map.of("userid", AttributeValue.fromS(userId)));
+		}
+		
+		BatchGetItemRequest request = BatchGetItemRequest
+				.builder()
+				// テーブル名に、上記のKeysをくっつけたMapにする
+				.requestItems(Map.of(usersTable, KeysAndAttributes
+						.builder()
+						.keys(keys)
+						.projectionExpression("userid, username")
+						.build()))
+				.build();
+		
+		BatchGetItemResponse response;
+		try { 
+			response = dynamoDb.batchGetItem(request);
+		} catch (DynamoDbException e) {
+			System.err.println(e.toString());
+			throw e;
+		}
+
+		// 取得成功した結果 {table名 = [ {userid=xxx, username=yyy},{userid=xxx, username=yyy},{...}]} をresultに入れる
+		// resultは、イミュータブルなので、追記用のミュータブルなMapに移し替える
+		
+		Map<String, List<Map<String, AttributeValue>>> result = response.responses();
+		
+		Map<String, List<Map<String, AttributeValue>>> mergedResult = new HashMap<>();
+		result.forEach((table, maps) -> { mergedResult.put(table, new ArrayList<>(maps));});
+		
+		// 未実行のリクエストを取得（テーブル名とKAA）
+		Map<String, KeysAndAttributes> unprocessed = response.unprocessedKeys();
+		
+		// 未実行のリクエストがあれば、再実行（最大５回）
+		int retryCount = 0;
+		int retryMaxCount = 5;
+		
+		while (!unprocessed.isEmpty() && retryCount < retryMaxCount ) {
+			
+			try {
+				BatchGetItemRequest retryRequest = BatchGetItemRequest.builder().requestItems(unprocessed).build();
+				
+				BatchGetItemResponse retryResponse = dynamoDb.batchGetItem(retryRequest);
+				
+				// Map<String, AttributeValue>が、1件のデータ userid=AttributeValue(xxx),username=AttributeValue(xxx)
+				Map<String, List<Map<String, AttributeValue>>> retryResult = retryResponse.responses();
+				// 2回目以降のリクエストで取得したデータをmergedに追記する
+				// 1回目のリクエストで取得できていなかった場合（キー自体が無いので）、
+				// computeIfAbsentを使って、キーと値（空のリスト）を作ってから、追記する
+				// 元のデータretryReultはイミュータブル（の可能性があるので）ミュータブルにしてallAll追加する
+				retryResult.forEach((table, maps) -> { mergedResult.computeIfAbsent(table, f -> new ArrayList<>()).addAll(new ArrayList<>(maps));} );
+				
+				unprocessed = retryResponse.unprocessedKeys();
+				
+				retryCount++;
+			
+			} catch (DynamoDbException e) {
+				System.out.println(e.toString());
+				throw e;
+			}
+			
+		}
+		
+		// 取得結果から、userid=usernameの対応表（Map）を作って返す
+		List<Map<String, AttributeValue>> items = new ArrayList<>();
+		items.addAll(mergedResult.get(usersTable));
+		
+		Map<String, String> userNameMap = new HashMap<>();
+		String key;
+		String value;
+		
+		for (Map<String, AttributeValue> item: items) {
+			key = item.get("userid").s();
+			value = item.get("username").s();
+			userNameMap.put(key, value);
+		}
+		
+		return userNameMap;
+		
 	}
 	
 }

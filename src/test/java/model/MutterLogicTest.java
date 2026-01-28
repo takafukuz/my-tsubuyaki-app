@@ -6,6 +6,8 @@ import static org.mockito.Mockito.*;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import org.mockito.MockedConstruction;
 
 import common.DbOpeResult;
 import dao.MuttersDAO;
+import dao.UsersDAO;
 import entity.Mutter;
 
 public class MutterLogicTest {
@@ -30,7 +33,8 @@ public class MutterLogicTest {
     @Test
     void testGetAllMutters_success() {
 
-        try (MockedConstruction<MuttersDAO> mocked =
+        try (
+            MockedConstruction<MuttersDAO> mockedMutters =
                 mockConstruction(MuttersDAO.class, (mock, context) -> {
 
                     when(mock.selectAllMutters()).thenReturn(
@@ -41,15 +45,34 @@ public class MutterLogicTest {
                                 new Timestamp(System.currentTimeMillis()))
                         )
                     );
-                })) {
+                });
+
+            MockedConstruction<UsersDAO> mockedUsers =
+                mockConstruction(UsersDAO.class, (mock, context) -> {
+
+                    when(mock.findUserByIds(Set.of("u1", "u2")))
+                        .thenReturn(Map.of(
+                            "u1", "Taro",
+                            "u2", "Hanako"
+                        ));
+                })
+        ) {
 
             List<Mutter> result = logic.getAllMutters();
 
             assertEquals(2, result.size());
+
+            // 1件目
             assertEquals("m1", result.get(0).getMutterId());
             assertEquals("u1", result.get(0).getUserId());
             assertEquals("Taro", result.get(0).getUserName());
             assertEquals("Hello", result.get(0).getMutter());
+
+            // 2件目
+            assertEquals("m2", result.get(1).getMutterId());
+            assertEquals("u2", result.get(1).getUserId());
+            assertEquals("Hanako", result.get(1).getUserName());
+            assertEquals("World", result.get(1).getMutter());
         }
     }
 

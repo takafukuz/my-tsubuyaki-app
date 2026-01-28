@@ -36,7 +36,7 @@ class AdminLoginLogicTest {
                 })) {
 
             AdminLoginLogic logic = new AdminLoginLogic();
-            Integer result = logic.canLogin("taro", "pass");
+            String result = logic.canLogin("taro", "pass");
 
             assertNull(result);
         }
@@ -54,7 +54,7 @@ class AdminLoginLogicTest {
 
         String hashedPassword = hashPassword(password, salt);
 
-        AuthInfo authInfo = new AuthInfo(hashedPassword, saltStr, 99);
+        AuthInfo authInfo = new AuthInfo(hashedPassword, saltStr, "99");
 
         try (MockedConstruction<AdminUsersDAO> mocked =
                 mockConstruction(AdminUsersDAO.class, (mock, context) -> {
@@ -62,9 +62,9 @@ class AdminLoginLogicTest {
                 })) {
 
             AdminLoginLogic logic = new AdminLoginLogic();
-            Integer result = logic.canLogin("taro", "secret123");
+            String result = logic.canLogin("taro", "secret123");
 
-            assertEquals(99, result);
+            assertEquals("99", result);
         }
     }
 
@@ -80,7 +80,7 @@ class AdminLoginLogicTest {
 
         String hashedPassword = hashPassword(correctPassword, salt);
 
-        AuthInfo authInfo = new AuthInfo(hashedPassword, saltStr, 99);
+        AuthInfo authInfo = new AuthInfo(hashedPassword, saltStr, "99");
 
         try (MockedConstruction<AdminUsersDAO> mocked =
                 mockConstruction(AdminUsersDAO.class, (mock, context) -> {
@@ -88,7 +88,7 @@ class AdminLoginLogicTest {
                 })) {
 
             AdminLoginLogic logic = new AdminLoginLogic();
-            Integer result = logic.canLogin("taro", "wrongPassword");
+            String result = logic.canLogin("taro", "wrongPassword");
 
             assertNull(result);
         }
@@ -101,7 +101,7 @@ class AdminLoginLogicTest {
     void testCanLogin_hashingThrowsException() {
 
         // DAO は正常に AuthInfo を返す（例外は投げない）
-        AuthInfo authInfo = new AuthInfo("dummyHash", "dummySalt", 99);
+        AuthInfo authInfo = new AuthInfo("dummyHash", "dummySalt", "99");
 
         try (MockedConstruction<AdminUsersDAO> mockedDao =
                 mockConstruction(AdminUsersDAO.class, (mock, context) -> {
@@ -114,7 +114,7 @@ class AdminLoginLogicTest {
                      .thenThrow(new RuntimeException("hash error"));
 
             AdminLoginLogic logic = new AdminLoginLogic();
-            Integer result = logic.canLogin("taro", "pass");
+            String result = logic.canLogin("taro", "pass");
 
             assertNull(result);
         }

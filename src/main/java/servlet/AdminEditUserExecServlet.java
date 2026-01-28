@@ -11,8 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import common.DbOpeResult;
-import dao.AdminUsersDAO;
 import entity.UserInfo;
+import model.AdminUserLogic;
 
 /**
  * Servlet implementation class AdminEditUserExecServlet
@@ -25,16 +25,15 @@ public class AdminEditUserExecServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
 		
-		int userId = Integer.parseInt(request.getParameter("userId"));
+		String userId = request.getParameter("userId");
 		String userName = request.getParameter("userName");
 		// 確認画面からPOSTされるadminPrivはチェックボックスではない(hidden)
 		int adminPriv = Integer.parseInt(request.getParameter("adminPriv"));
 		
 		UserInfo userInfo = new UserInfo(userId, userName, adminPriv);
 		
-		// userInfoをもとにDBをUPDATEする
-		AdminUsersDAO dao = new AdminUsersDAO();
-		DbOpeResult result = dao.updateUserInfo(userInfo);
+		AdminUserLogic logic = new AdminUserLogic();
+		DbOpeResult result = logic.updateUserInfo(userInfo);
 		
 		if (result != DbOpeResult.SUCCESS) {
 			

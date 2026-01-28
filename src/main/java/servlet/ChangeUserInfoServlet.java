@@ -11,8 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import common.DbOpeResult;
-import dao.UsersDAO;
 import entity.LoginUser;
+import model.UpdateUserInfoLogic;
 
 /**
  * Servlet implementation class ChangeUserInfo
@@ -32,7 +32,7 @@ public class ChangeUserInfoServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// POSTパラメータを取得
 		request.setCharacterEncoding("UTF-8");
-		int userId = Integer.parseInt(request.getParameter("userId"));
+		String userId = request.getParameter("userId");
 		String newUserName = request.getParameter("newUserName");
 		
 		// 名前が変更されていなければ、画面を戻して、エラーmsgを表示
@@ -46,8 +46,10 @@ public class ChangeUserInfoServlet extends HttpServlet {
 			return;
 		}
 		
-		UsersDAO dao = new UsersDAO();
-		DbOpeResult result = dao.updateUserName(userId,newUserName);
+		//UsersDAO dao = new UsersDAO();
+		//DbOpeResult result = dao.updateUserName(userId,newUserName);
+		UpdateUserInfoLogic logic = new UpdateUserInfoLogic();
+		DbOpeResult result = logic.changeUserName(userId, newUserName);
 		
 		if (result == DbOpeResult.SUCCESS) {
 			// LoginUserインスタンスの情報を更新して、セッションスコープに入れ直す

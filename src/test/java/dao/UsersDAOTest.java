@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,10 +21,13 @@ import infrastructure.AppConfig;
 import infrastructure.DynamoDbClientHolder;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.BatchGetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.BatchGetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.CancellationReason;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
 import software.amazon.awssdk.services.dynamodb.model.QueryRequest;
 import software.amazon.awssdk.services.dynamodb.model.QueryResponse;
 import software.amazon.awssdk.services.dynamodb.model.TransactWriteItemsRequest;
@@ -231,4 +235,132 @@ class UsersDAOTest {
         assertEquals(DbOpeResult.ERROR, result);
     }
 
+    // ---------------------------------------------------------
+    // findUserByIds()
+    // ---------------------------------------------------------
+    @Test
+    void testFindUserByIds_success_noRetry() {
+
+        // 入力
+        var ids = Set.of("u1", "u2");
+
+        // DynamoDB が返すレスポンス（retry なし）
+        Map<String, AttributeValue> item1 = Map.of(
+                "userid", AttributeValue.fromS("u1"),
+                "username", AttributeValue.fromS("Alice")
+        );
+
+        Map<String, AttributeValue> item2 = Map.of(
+                "userid", AttributeValue.fromS("u2"),
+                "username", AttributeValue.fromS("Bob")
+        );
+
+        Map<String, List<Map<String, AttributeValue>>> responses =
+                Map.of("UsersTable", List.of(item1, item2));
+
+        var mockResponse = software.amazon.awssdk.services.dynamodb.model.BatchGetItemResponse
+                .builder()
+                .responses(responses)
+                .unprocessedKeys(Map.of())
+                .build();
+
+        when(mockDynamo.batchGetItem(any(BatchGetItemRequest.class)))
+        .thenReturn(mockResponse);
+
+
+        // 実行
+        Map<String, String> result = dao.findUserByIds(ids);
+
+        // 検証
+        assertEquals(2, result.size());
+        assertEquals("Alice", result.get("u1"));
+        assertEquals("Bob", result.get("u2"));
+    }
+
+    //20260128追記
+    @Test
+    void testFindUserByIds_withRetry() {
+
+        // 対象ID
+        var ids = Set.of("u1", "u2");
+
+        // --- 1回目のレスポンス（u1 だけ返る） ---
+        Map<String, AttributeValue> item1 = Map.of(
+                "userid", AttributeValue.fromS("u1"),
+                "username", AttributeValue.fromS("Alice")
+        );
+
+        Map<String, List<Map<String, AttributeValue>>> firstResponse =
+                Map.of("UsersTable", List.of(item1));
+
+        // u2 が未処理
+        Map<String, KeysAndAttributes> unprocessed =
+                Map.of("UsersTable",
+                        KeysAndAttributes.builder()
+                                .keys(List.of(Map.of("userid", AttributeValue.fromS("u2"))))
+                                .build()
+                );
+
+        BatchGetItemResponse mockResponse1 = BatchGetItemResponse.builder()
+                .responses(firstResponse)
+                .unprocessedKeys(unprocessed)
+                .build();
+
+
+        // --- 2回目のレスポンス（u2 が返る） ---
+        Map<String, AttributeValue> item2 = Map.of(
+                "userid", AttributeValue.fromS("u2"),
+                "username", AttributeValue.fromS("Bob")
+        );
+
+        Map<String, List<Map<String, AttributeValue>>> secondResponse =
+                Map.of("UsersTable", List.of(item2));
+
+        BatchGetItemResponse mockResponse2 = BatchGetItemResponse.builder()
+                .responses(secondResponse)
+                .unprocessedKeys(Map.of())   // 未処理なし
+                .build();
+
+
+        // --- DynamoDB のモック設定 ---
+        when(mockDynamo.batchGetItem(any(BatchGetItemRequest.class)))
+                .thenReturn(mockResponse1)   // 1回目
+                .thenReturn(mockResponse2);  // retry
+
+
+        // --- 実行 ---
+        Map<String, String> result = dao.findUserByIds(ids);
+
+
+        // --- 検証 ---
+        assertEquals(2, result.size());
+        assertEquals("Alice", result.get("u1"));
+        assertEquals("Bob", result.get("u2"));
+
+        // retry が 1 回だけ呼ばれたことも確認
+        verify(mockDynamo, times(2)).batchGetItem(any(BatchGetItemRequest.class));
+    }
+    
+    @Test
+    void testFindUserByIds_emptyInput() {
+
+        Map<String, String> result = dao.findUserByIds(Set.of());
+
+        assertTrue(result.isEmpty());
+        verify(mockDynamo, never()).batchGetItem(any(BatchGetItemRequest.class));
+    }
+
+
+    @Test
+    void testFindUserByIds_dynamoException() {
+
+        var ids = Set.of("u1");
+
+        when(mockDynamo.batchGetItem(any(BatchGetItemRequest.class)))
+        	.thenThrow(DynamoDbException.builder().message("error").build());
+
+        assertThrows(DynamoDbException.class, () -> dao.findUserByIds(ids));
+    }
+    
+    
 }

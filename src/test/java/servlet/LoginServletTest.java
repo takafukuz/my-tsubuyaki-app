@@ -51,7 +51,7 @@ public class LoginServletTest {
         when(request.getContextPath()).thenReturn("/my-tsubuyaki-app");
 
         // ログイン成功を想定
-        when(loginLogicMock.canLogin("taro", "1234")).thenReturn(1);
+        when(loginLogicMock.canLogin("taro", "1234")).thenReturn("1");
 
         // 実行
         servlet.doPost(request, response);

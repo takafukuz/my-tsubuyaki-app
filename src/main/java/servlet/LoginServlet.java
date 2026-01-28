@@ -40,7 +40,7 @@ public class LoginServlet extends HttpServlet {
 		String password = request.getParameter("password");
 		
 		// LoginLogic loginLogic = new LoginLogic();
-		Integer userId = loginLogic.canLogin(userName, password);
+		String userId = loginLogic.canLogin(userName, password);
 		
 		if (userId == null) {
 			// 認証失敗。ログイン画面に戻す

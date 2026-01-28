@@ -22,17 +22,17 @@ public class AdminEditUserServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		// GETパラメータの取得
-		String userIdStr = request.getParameter("userid");
+		String userId = request.getParameter("userid");
 		
 		// パラメータがなければ、メイン画面（ユーザー一覧）に戻す
-		if (userIdStr == null || userIdStr.isEmpty()) {
+		if (userId == null || userId.isEmpty()) {
 			response.sendRedirect(request.getContextPath() + "/admin/main");
 			return;
 		}
 		
 		// パラメータをuserIdに代入
 		// 数値でない値が来たときの処理を考慮する必要があるかどうか
-		int userId = Integer.parseInt(userIdStr);
+//		int userId = Integer.parseInt(userIdStr);
 		
 		// パラメータをもとに当該userIdのユーザー情報を取得して、表示する
 		AdminUserLogic logic = new AdminUserLogic();

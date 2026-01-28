@@ -15,7 +15,9 @@ public class LoginLogic {
     private static int iterations = 10000; // 反復回数
     private static int keyLength = 256;    // ハッシュの長さ
 	
-	public Integer canLogin(String userName,String password) {
+	public String canLogin(String userName,String password) {
+		
+		// System.out.println("canLogin開始" + java.time.LocalDateTime.now());
 		
 		try {
 			// ユーザー名をもとにDBから登録パスワードとソルト値を取得
@@ -24,24 +26,31 @@ public class LoginLogic {
 			
 			// DAOの結果がnullであれば、false
 			if ( authInfo == null ) {
-				System.out.println("認証失敗：" + userName + "のパスワード情報がありません");
+				System.out.println("認証失敗：" + userName + "のパスワード情報がありません"  + java.time.LocalDateTime.now());
 				return null;
 			}
 			
+			// System.out.println("getPassword終了" + java.time.LocalDateTime.now());
+			
 			// 入力されたパスワードを同じソルト値でハッシュ化（ハッシュ文字列はbyte[]にする必要あり）
+			// System.out.println("入力パスワードのハッシュ化開始：" + java.time.LocalDateTime.now());
+			
 			byte[] salt = Base64.getDecoder().decode(authInfo.getSalt());
 	
 	        PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, iterations, keyLength);
 	        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 	        byte[] inputPasswordHash = skf.generateSecret(spec).getEncoded();
 	        
+	        // System.out.println("入力パスワードのハッシュ化終了：" + java.time.LocalDateTime.now());
 			// 入力パスワードと登録パスワードを比較
 	        byte[] collectPasswordHash = Base64.getDecoder().decode(authInfo.getPassword());
 	        
 	        // ログイン成功時は、userIdを返す。失敗時はnullを返す
 	        if (slowEquals(inputPasswordHash,collectPasswordHash)) {
+	        	System.out.println(userName + "のログイン成功："  + java.time.LocalDateTime.now());
 	        	return authInfo.getUserId()	;
 	        } else {
+	        	System.out.println(userName + "のログイン失敗："  + java.time.LocalDateTime.now());
 	        	return null;
 	        }
 	        

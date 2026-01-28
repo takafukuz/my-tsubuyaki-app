@@ -36,7 +36,7 @@ public class ChangePasswordServlet extends HttpServlet {
 		
 		// フォームから値を取得
 		request.setCharacterEncoding("UTF-8");
-		int userId = Integer.parseInt(request.getParameter("userId"));
+		String userId = request.getParameter("userId");
 		String password = request.getParameter("password");
 		String confirmPassword = request.getParameter("confirmPassword");
 		

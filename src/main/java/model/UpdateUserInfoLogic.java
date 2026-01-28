@@ -17,7 +17,15 @@ public class UpdateUserInfoLogic {
     private static int keyLength = 256;    // ハッシュの長さ
 	
     //入力パスワードをハッシュ化して、DBに保存する
-	public DbOpeResult changePassword(int userId,String password) {
+	public DbOpeResult changePassword(String userId,String password) {
+		
+		if (userId == null || userId.isBlank()) {
+			return DbOpeResult.ERROR;
+		}
+		
+		if (password == null || password.isBlank()) {
+			return DbOpeResult.ERROR;
+		}
 		
 		try {
 			// ソルトの生成
@@ -45,7 +53,15 @@ public class UpdateUserInfoLogic {
 	}
 	
 	// ユーザー名を変更する
-	public DbOpeResult changeUserName(int userId,String userName) {
+	public DbOpeResult changeUserName(String userId,String userName) {
+		
+		if (userId == null || userId.isBlank()) {
+			return DbOpeResult.ERROR;
+		}
+		
+		if (userName == null || userName.isBlank()) {
+			return DbOpeResult.ERROR;
+		}
 		
 		UsersDAO dao = new UsersDAO();
 		DbOpeResult result = dao.updateUserName(userId, userName);

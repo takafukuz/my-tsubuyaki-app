@@ -31,7 +31,7 @@ public class AdminLoginServlet extends HttpServlet {
 		
 		// AdminLoginLogicにログイン判定を投げる
 		AdminLoginLogic loginLogic = new AdminLoginLogic();
-		Integer userId = loginLogic.canLogin(username, password);
+		String userId = loginLogic.canLogin(username, password);
 		
 		// ログイン失敗の場合、エラーmsgをセットして、login.jspにフォワード
 		if ( userId == null ) {

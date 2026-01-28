@@ -40,9 +40,9 @@ public class AdminDelUserExecServlet extends HttpServlet {
 		}
 		
 		// 選択ユーザーをリストに入れ替え
-		List<Integer> userIds = new ArrayList<>();
+		List<String> userIds = new ArrayList<>();
 		for (String user: selectedUsers) {
-			userIds.add(Integer.parseInt(user));
+			userIds.add(user);
 		}
 		
 		// DBからユーザーの削除の実施

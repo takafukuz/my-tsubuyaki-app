@@ -37,9 +37,10 @@ public class AdminDelUserServlet extends HttpServlet {
 			return;
 		}
 		
-		List<Integer> userIds = new ArrayList<>();
+		// Stringの配列をStringのリストに入れ直す
+		List<String> userIds = new ArrayList<>();
 		for (String user: selectedUsers) {
-			userIds.add(Integer.parseInt(user));
+			userIds.add(user);
 		}
 		
 		// userIdsをAdminUserLogicに引き渡す

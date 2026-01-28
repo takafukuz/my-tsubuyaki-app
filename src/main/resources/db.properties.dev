@@ -1,0 +1,3 @@
+dynamodb.table.users=tsubuyaki_dev_users
+dynamodb.table.usernames=tsubuyaki_dev_usernames
+dynamodb.table.mutters=tsubuyaki_dev_mutters

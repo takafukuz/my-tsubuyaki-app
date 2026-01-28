@@ -99,6 +99,13 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.17.0</version>
     </dependency>
+    
+    <!--DynamoDBへの接続-->
+	<dependency>
+	    <groupId>software.amazon.awssdk</groupId>
+	    <artifactId>dynamodb</artifactId>
+	    <version>2.25.0</version>
+	</dependency>
 
   </dependencies>
   

@@ -29,7 +29,7 @@ public class AdminUserLogic {
 
 	}
 	
-	public UserInfo getUserInfo(int userId) {
+	public UserInfo getUserInfo(String userId) {
 		
 		AdminUsersDAO dao = new AdminUsersDAO();
 		UserInfo userInfo = dao.getUserInfo(userId);
@@ -39,9 +39,21 @@ public class AdminUserLogic {
 	
 	public DbOpeResult addUser(NewUserForm newUserForm) {
 		
+		if (newUserForm == null) {
+			return DbOpeResult.ERROR;
+		}
+		
 		String userName = newUserForm.getUserName();
 		int adminPriv = newUserForm.getAdminPriv();
 		String password = newUserForm.getPassword();
+		
+		if (userName == null || userName.isBlank()) {
+			return DbOpeResult.ERROR;
+		}
+		
+		if (password == null || password.isBlank()) {
+			return DbOpeResult.ERROR;
+		}
 		
 		NewUserInfo newUserInfo = new NewUserInfo();
 		
@@ -74,7 +86,7 @@ public class AdminUserLogic {
 		
 	}
 	
-	public List<UserInfo> findUsersByIds(List<Integer> userIds){
+	public List<UserInfo> findUsersByIds(List<String> userIds){
 		
 		AdminUsersDAO dao = new AdminUsersDAO();
 		List<UserInfo> userList = dao.findUsersByIds(userIds);
@@ -82,10 +94,19 @@ public class AdminUserLogic {
 		return userList;
 	}
 	
-	public int delUser(List<Integer> userIds) {
+	public int delUser(List<String> userIds) {
 
 		AdminUsersDAO dao = new AdminUsersDAO();
 		int result = dao.delUser(userIds);
+		
+		return result;
+		
+	}
+	
+	public DbOpeResult updateUserInfo(UserInfo userInfo) {
+
+		AdminUsersDAO dao = new AdminUsersDAO();
+		DbOpeResult result = dao.updateUserInfo(userInfo);
 		
 		return result;
 		

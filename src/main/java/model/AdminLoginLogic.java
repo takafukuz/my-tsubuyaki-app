@@ -16,7 +16,7 @@ public class AdminLoginLogic {
     private static int iterations = 10000; // 反復回数
     private static int keyLength = 256;    // ハッシュの長さ
 	
-	public Integer canLogin(String username, String password) {
+	public String canLogin(String username, String password) {
 		
 		try {
 			AdminUsersDAO dao = new AdminUsersDAO();

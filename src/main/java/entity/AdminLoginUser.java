@@ -4,16 +4,16 @@ import java.io.Serializable;
 
 public class AdminLoginUser implements Serializable{
 	
-	private int userId;
+	private String userId;
 	private String userName;
 	
 	public AdminLoginUser() {}
-	public AdminLoginUser(int userId,String userName) {
+	public AdminLoginUser(String userId,String userName) {
 		this.userId = userId;
 		this.userName = userName;
 	}
 
-	public int getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 	

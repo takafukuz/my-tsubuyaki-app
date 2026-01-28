@@ -26,35 +26,35 @@ public class DelMutterServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
 		
-		String mutterIdStr = request.getParameter("targetMutterId");
-		String userIdStr = request.getParameter("targetUserId");
-		int mutterId;
-		int userId;
+		String mutterId = request.getParameter("targetMutterId");
+		String userId = request.getParameter("targetUserId");
+//		int mutterId;
+//		int userId;
 		
 		HttpSession session = request.getSession();
 		
 		// 値がnullの場合、エラーmsgを設定して、リダイレクト
-		if (mutterIdStr== null || userIdStr == null) {
+		if (mutterId== null || userId == null) {
 			session.setAttribute("errorMsg", "mutterIdまたはuserIdがNULLです。");
 			response.sendRedirect(request.getContextPath() + "/main");
 			return;
 		}
 		
 		// 値が数値でない場合、エラーmsgを設定して、リダイレクト
-		try {
-			mutterId = Integer.parseInt(mutterIdStr);
-			userId = Integer.parseInt(userIdStr);
-		} catch (NumberFormatException e) {
-			session.setAttribute("errorMsg", "mutterIdまたはuserIdが数値ではありません。");
-			response.sendRedirect(request.getContextPath() + "/main");
-			return;
-		}
+//		try {
+//			mutterId = Integer.parseInt(mutterIdStr);
+//			userId = Integer.parseInt(userIdStr);
+//		} catch (NumberFormatException e) {
+//			session.setAttribute("errorMsg", "mutterIdまたはuserIdが数値ではありません。");
+//			response.sendRedirect(request.getContextPath() + "/main");
+//			return;
+//		}
 		
-		// userIdがログインしているユーザー出ない場合、エラーmsgを設定して、リダイレクト
+		// userIdがログインしているユーザーではない場合、エラーmsgを設定して、リダイレクト
 
 		LoginUser loginUser = (LoginUser)session.getAttribute("loginUser");
 		
-		if ( loginUser.getUserId() != userId ) {
+		if ( !loginUser.getUserId().equals(userId)) {
 			session.setAttribute("errorMsg", "他のユーザーのつぶやきを削除することはできません。");
 			response.sendRedirect(request.getContextPath() + "/main");
 			return;

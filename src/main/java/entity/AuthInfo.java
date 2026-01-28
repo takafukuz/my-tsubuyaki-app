@@ -6,13 +6,13 @@ public class AuthInfo implements Serializable{
 	
 	private String password;
 	private String salt;
-	private Integer userId;
+	private String userId;
 	
 	public AuthInfo() {
 		
 	}
 	
-	public AuthInfo(String password,String salt,Integer userId) {
+	public AuthInfo(String password,String salt,String userId) {
 		this.password = password;
 		this.salt = salt;
 		this.userId = userId;
@@ -34,11 +34,11 @@ public class AuthInfo implements Serializable{
 		this.salt = salt;
 	}
 	
-	public int getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 	
-	public void setUserId(Integer userId) {
+	public void setUserId(String userId) {
 		this.userId = userId;
 	}
 

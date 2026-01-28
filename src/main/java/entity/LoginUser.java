@@ -4,16 +4,16 @@ import java.io.Serializable;
 
 public class LoginUser implements Serializable{
 	
-	private int userId;
+	private String userId;
 	private String userName;
 	
 	public LoginUser() {}
-	public LoginUser(int userId,String userName) {
+	public LoginUser(String userId,String userName) {
 		this.userId = userId;
 		this.userName = userName;
 	}
 
-	public int getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 	

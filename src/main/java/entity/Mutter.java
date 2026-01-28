@@ -4,15 +4,15 @@ import java.sql.Timestamp;
 
 public class Mutter {
 	
-	private int mutterId;
-	private int userId;
+	private String mutterId;
+	private String userId;
 	private String userName;
 	private String mutter;
 	private Timestamp createdAt;
 	
 	public Mutter() {}
 	
-	public Mutter(int mutterId,int userId,String userName,String mutter,Timestamp createdAt) {
+	public Mutter(String mutterId,String userId,String userName,String mutter,Timestamp createdAt) {
 		this.mutterId = mutterId;
 		this.userId = userId;
 		this.userName = userName;
@@ -20,19 +20,19 @@ public class Mutter {
 		this.createdAt = createdAt;
 	}
 
-	public int getMutterId() {
+	public String getMutterId() {
 		return mutterId;
 	}
 	
-	public void setMutterId(int mutterId) {
+	public void setMutterId(String mutterId) {
 		this.mutterId = mutterId;
 	}
 	
-	public int getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 	
-	public int setUserId(int userId) {
+	public String setUserId(String userId) {
 		return userId;
 	}
 	

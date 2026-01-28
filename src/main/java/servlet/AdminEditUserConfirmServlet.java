@@ -22,7 +22,7 @@ public class AdminEditUserConfirmServlet extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		
 		// POSTパラメータの取得
-		int userId = Integer.parseInt(request.getParameter("userId"));
+		String userId = request.getParameter("userId");
 		String userName = request.getParameter("userName");
 		
 		// adminPrivはチェックボックスなので、チェックされなければ値がこない

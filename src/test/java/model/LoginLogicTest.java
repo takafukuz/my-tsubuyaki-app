@@ -29,7 +29,7 @@ class LoginLogicTest {
                 })) {
 
             LoginLogic logic = new LoginLogic();
-            Integer result = logic.canLogin("taro", "pass");
+            String result = logic.canLogin("taro", "pass");
 
             assertNull(result);
         }
@@ -52,7 +52,7 @@ class LoginLogicTest {
         ).getEncoded();
         String hashStr = Base64.getEncoder().encodeToString(hash);
 
-        AuthInfo authInfo = new AuthInfo(hashStr, saltStr, 99);
+        AuthInfo authInfo = new AuthInfo(hashStr, saltStr, "99");
 
         try (MockedConstruction<UsersDAO> mocked =
                 mockConstruction(UsersDAO.class, (mock, context) -> {
@@ -60,9 +60,9 @@ class LoginLogicTest {
                 })) {
 
             LoginLogic logic = new LoginLogic();
-            Integer result = logic.canLogin("taro", "secret123");
+            String result = logic.canLogin("taro", "secret123");
 
-            assertEquals(99, result);
+            assertEquals("99", result);
         }
     }
 
@@ -83,7 +83,7 @@ class LoginLogicTest {
         ).getEncoded();
         String correctHashStr = Base64.getEncoder().encodeToString(correctHash);
 
-        AuthInfo authInfo = new AuthInfo(correctHashStr, saltStr, 99);
+        AuthInfo authInfo = new AuthInfo(correctHashStr, saltStr, "99");
 
         try (MockedConstruction<UsersDAO> mocked =
                 mockConstruction(UsersDAO.class, (mock, context) -> {
@@ -91,7 +91,7 @@ class LoginLogicTest {
                 })) {
 
             LoginLogic logic = new LoginLogic();
-            Integer result = logic.canLogin("taro", "wrongPassword");
+            String result = logic.canLogin("taro", "wrongPassword");
 
             assertNull(result);
         }
@@ -103,7 +103,7 @@ class LoginLogicTest {
     @Test
     void testCanLogin_hashingException() {
 
-        AuthInfo authInfo = new AuthInfo("dummyHash", "dummySalt", 99);
+        AuthInfo authInfo = new AuthInfo("dummyHash", "dummySalt", "99");
 
         try (MockedConstruction<UsersDAO> mockedDao =
                 mockConstruction(UsersDAO.class, (mock, context) -> {
@@ -116,7 +116,7 @@ class LoginLogicTest {
                      .thenThrow(new NoSuchAlgorithmException("hash error"));
 
             LoginLogic logic = new LoginLogic();
-            Integer result = logic.canLogin("taro", "pass");
+            String result = logic.canLogin("taro", "pass");
 
             assertNull(result);
         }

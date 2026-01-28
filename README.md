@@ -11,13 +11,15 @@ Web アプリケーション開発の全体像を意識し、GitHub への push 
 Maven によるビルド → Docker イメージ作成（nginx＋Tomcat） →  
 AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプラインを構築しています（.github/workflows/main.yaml）。
 
-稼働環境では、ALBおよびElastiCache（Valkey・セッション管理）を利用し、スケールアウト可能な実務に近い環境を再現しています。
+稼働環境では、ALBおよびElastiCache（Valkey・セッション管理）、DynamoDBを利用し、スケールアウト可能な実務に近い環境を再現しています。
+
+** 2026/01/29 ** データベースを RDS(MySQL) -> DynamoDBに変更しました。 
 
 ## 概要
 - 言語: Java 21（Servlet / JSP / JSTL）
 - ビルド: Maven
 - 実行環境: Tomcat 10（ElastiCache接続用にRedissonライブラリを利用）
-- インフラ: Docker, AWS ECS(Fargate), ALB, ElastiCache（Valkey）, RDS(MySQL), SecretsManager, ACM(TLS証明書)
+- インフラ: Docker, AWS ECS(Fargate), ALB, ElastiCache（Valkey）, DynamoDB, ACM(TLS証明書)
 - CI/CD: GitHub Actions
 
 ## Web サイトの利用方法
@@ -47,7 +49,7 @@ AWS ECS（Fargate）への自動デプロイまで行う CI/CD パイプライ�
     なお、デモ環境のため、パスワードを変更された場合は、元の内容にお戻しいただけますと幸いです。
 
 ## インフラ構成
-「tsubuyaki_インフラ構成図.png」を参照
+「tsubuyaki_インフラ構成図.png」を参照　＊修正中
 
 ## 画面遷移図
 「tsubuyaki_画面遷移図.pdf」を参照
@@ -208,7 +210,14 @@ my-tsubuyaki-app/
 - インフラ関連
   - DynamoDBへの変更
   - CDKによる構成管理
-  
+
+## 不具合
+
+- 投稿直後に一覧へ即時反映されない場合があります
+
+  DynamoDB GSIの非同期反映によるタイムラグが原因と見られ、暫定対応済みですが、今後はGSIに依存しないキー設計へ見直す予定です
+
+
 ---
 
-**最終更新**: 2026年1月23日
+**最終更新**: 2026年1月29日
